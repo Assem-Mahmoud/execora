@@ -1,0 +1,61 @@
+exe-button {
+  display: inline-flex;
+  position: relative;
+
+  .spinner {
+    @apply block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent;
+  }
+
+  .icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &.icon-left {
+      @apply mr-1;
+    }
+
+    &.icon-right {
+      @apply ml-1;
+    }
+  }
+}
+
+// EXECORA Brand Colors
+:root {
+  --crimson-600: #B11226;
+  --crimson-700: #961020;
+  --charcoal-700: #1F2937;
+  --charcoal-800: #111827;
+  --charcoal-100: #F3F4F6;
+  --charcoal-300: #D1D5DB;
+  --insight-blue-600: #2563EB;
+}
+
+.bg-crimson-600 {
+  background-color: var(--crimson-600);
+}
+
+.hover\:bg-crimson-700:hover {
+  background-color: var(--crimson-700);
+}
+
+.bg-charcoal-700 {
+  background-color: var(--charcoal-700);
+}
+
+.hover\:bg-charcoal-800:hover {
+  background-color: var(--charcoal-800);
+}
+
+.bg-charcoal-100 {
+  background-color: var(--charcoal-100);
+}
+
+.border-charcoal-300 {
+  border-color: var(--charcoal-300);
+}
+
+.text-insight-blue-600 {
+  color: var(--insight-blue-600);
+}
