@@ -1,0 +1,87 @@
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  &:not(.full-width) {
+    width: auto;
+    display: inline-flex;
+  }
+}
+
+.label {
+  @apply block text-sm font-medium text-charcoal-700;
+}
+
+.required-indicator {
+  @apply ml-1 text-red-500;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+.icon {
+  @apply absolute flex items-center justify-center text-charcoal-400 pointer-events-none;
+  height: 100%;
+
+  &.icon-left {
+    @apply left-0 pl-3;
+  }
+
+  &.icon-right {
+    @apply right-0 pr-3;
+  }
+}
+
+.helper-text {
+  @apply text-xs text-charcoal-500;
+}
+
+.error-text {
+  @apply text-xs text-red-600;
+}
+
+// EXECORA Brand Colors
+:root {
+  --charcoal-300: #D1D5DB;
+  --charcoal-400: #9CA3AF;
+  --charcoal-500: #6B7280;
+  --charcoal-700: #1F2937;
+  --charcoal-100: #F3F4F6;
+  --insight-blue-500: #3B82F6;
+}
+
+.border-charcoal-300 {
+  border-color: var(--charcoal-300);
+}
+
+.text-charcoal-400 {
+  color: var(--charcoal-400);
+}
+
+.placeholder\:text-charcoal-400::placeholder {
+  color: var(--charcoal-400);
+}
+
+.text-charcoal-700 {
+  color: var(--charcoal-700);
+}
+
+.text-charcoal-500 {
+  color: var(--charcoal-500);
+}
+
+.bg-charcoal-100 {
+  background-color: var(--charcoal-100);
+}
+
+.border-insight-blue-500 {
+  border-color: var(--insight-blue-500);
+}
+
+.focus\:ring-insight-blue-500:focus {
+  --tw-ring-color: var(--insight-blue-500);
+}

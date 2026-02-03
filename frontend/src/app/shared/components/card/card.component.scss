@@ -1,0 +1,54 @@
+exe-card {
+  display: block;
+}
+
+.card {
+  @apply bg-white rounded-lg;
+  transition: all 0.2s ease-in-out;
+}
+
+.card-padding {
+  @apply p-6;
+}
+
+.card-bordered {
+  @apply border border-charcoal-200;
+}
+
+.card-elevated {
+  @apply shadow-md;
+}
+
+.card-clickable {
+  @apply cursor-pointer;
+}
+
+.card-hoverable:hover {
+  @apply shadow-lg;
+  transform: translateY(-2px);
+}
+
+.card-header {
+  @apply px-6 pt-6 pb-4;
+}
+
+.card-subtitle {
+  @apply mt-1 text-sm text-charcoal-500;
+}
+
+.card-body {
+  @apply px-6 pb-6;
+}
+
+.card-footer {
+  @apply px-6 pb-6 pt-0;
+  @apply flex items-center gap-3;
+  @apply border-t border-charcoal-100;
+  padding-top: 1rem;
+}
+
+:root {
+  --charcoal-100: #F3F4F6;
+  --charcoal-200: #E5E7EB;
+  --charcoal-500: #6B7280;
+}

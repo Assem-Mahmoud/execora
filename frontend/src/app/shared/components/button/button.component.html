@@ -1,0 +1,20 @@
+<button
+  [type]="type()"
+  [class]="computedClass()"
+  [disabled]="disabled() || loading() || clicked()"
+  (click)="handleClick($event)"
+>
+  @if (loading() || clicked()) {
+    <span class="spinner" aria-hidden="true"></span>
+  } @else {
+    @if (showIconLeft()) {
+      <span class="icon icon-left" [innerHTML]="icon()"></span>
+    }
+
+    <ng-content />
+
+    @if (showIconRight()) {
+      <span class="icon icon-right" [innerHTML]="icon()"></span>
+    }
+  }
+</button>

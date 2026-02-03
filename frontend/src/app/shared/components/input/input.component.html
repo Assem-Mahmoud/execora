@@ -1,0 +1,45 @@
+<div class="input-wrapper" [class.full-width]="fullWidth()">
+  @if (label()) {
+    <label [for]="id()" class="label">
+      {{ label() }}
+      @if (required()) {
+        <span class="required-indicator">*</span>
+      }
+    </label>
+  }
+
+  <div class="input-container">
+    @if (icon() && iconPosition() === 'left') {
+      <span class="icon icon-left" [innerHTML]="icon()"></span>
+    }
+
+    <input
+      [id]="id()"
+      [type]="type()"
+      [placeholder]="placeholder()"
+      [disabled]="disabled()"
+      [readonly]="readonly()"
+      [required]="required()"
+      [value]="_value"
+      [class]="computedClass()"
+      [attr.maxlength]="maxLength()"
+      [attr.min]="min()"
+      [attr.max]="max()"
+      [attr.step]="step()"
+      (input)="handleInput($event)"
+      (blur)="handleBlur()"
+    />
+
+    @if (icon() && iconPosition() === 'right') {
+      <span class="icon icon-right" [innerHTML]="icon()"></span>
+    }
+  </div>
+
+  @if (helperText() && !error()) {
+    <p class="helper-text">{{ helperText() }}</p>
+  }
+
+  @if (error()) {
+    <p class="error-text">{{ error() }}</p>
+  }}
+</div>
