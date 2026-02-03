@@ -1,0 +1,76 @@
+<div class="main-layout" [class.sidebar-collapsed]="sidebarCollapsed()">
+  <!-- Sidebar -->
+  <aside class="sidebar" *ngIf="!sidebarCollapsed()">
+    <div class="sidebar-header">
+      <div class="brand">
+        <span class="brand-logo">EX</span>
+        <span class="brand-name">EXECORA</span>
+      </div>
+      <div class="tenant-badge">{{ getTenantName() }}</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a
+        *ngFor="let item of getFilteredNavItems()"
+        [routerLink]="item.path"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <span class="nav-icon">{{ item.icon }}</span>
+        <span class="nav-label">{{ item.label }}</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a
+        [routerLink]="'/app/settings'"
+        routerLinkActive="active"
+        class="nav-item nav-item-sm"
+      >
+        <span class="nav-icon">settings</span>
+        <span class="nav-label">Settings</span>
+      </a>
+      <a
+        [routerLink]="'/auth/logout'"
+        class="nav-item nav-item-sm nav-item-danger"
+      >
+        <span class="nav-icon">log-out</span>
+        <span class="nav-label">Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <button class="header-toggle" (click)="toggleSidebar()" *ngIf="sidebarCollapsed()">
+        <span>menu</span>
+      </button>
+
+      <h1 class="header-title">EXECORA</h1>
+
+      <div class="header-actions">
+        <!-- Notifications -->
+        <button class="header-action">
+          <span class="icon">bell</span>
+          <span class="badge">3</span>
+        </button>
+
+        <!-- User Menu -->
+        <div class="user-menu">
+          <button class="user-menu-button">
+            <span class="user-avatar">{{ getUserInitials() }}</span>
+            <span class="user-name">{{ getUserDisplayName() }}</span>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

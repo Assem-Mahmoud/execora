@@ -1,0 +1,38 @@
+.auth-layout {
+  @apply min-h-screen bg-charcoal-50 flex items-center justify-center p-4;
+}
+
+.auth-container {
+  @apply w-full max-w-md;
+}
+
+.auth-brand {
+  @apply text-center mb-8;
+}
+
+.brand-logo {
+  @apply w-16 h-16 bg-crimson-600 text-white rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-4;
+}
+
+.brand-name {
+  @apply text-3xl font-bold text-charcoal-800;
+}
+
+.brand-tagline {
+  @apply text-charcoal-500 mt-2;
+}
+
+.auth-content {
+  @apply bg-white rounded-lg shadow-lg p-8;
+}
+
+.auth-footer {
+  @apply text-center mt-6 text-sm text-charcoal-500;
+}
+
+:root {
+  --charcoal-50: #F9FAFB;
+  --charcoal-500: #9CA3AF;
+  --charcoal-800: #1F2937;
+  --crimson-600: #B11226;
+}
