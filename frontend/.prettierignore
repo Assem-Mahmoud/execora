@@ -1,0 +1,23 @@
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Dependencies
+node_modules/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Generated files
+*.generated.ts
+*.pb.ts
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log

@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Execora.Api/Execora.Api.csproj" />
+    <Project Path="src/Execora.Application/Execora.Application.csproj" />
+    <Project Path="src/Execora.Auth/Execora.Auth.csproj" />
+    <Project Path="src/Execora.Core/Execora.Core.csproj" />
+    <Project Path="src/Execora.Infrastructure/Execora.Infrastructure.csproj" />
+    <Project Path="src/Execora.Workflow/Execora.Workflow.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Execora.Tests.Integration/Execora.Tests.Integration.csproj" />
+    <Project Path="tests/Execora.Tests.Unit/Execora.Tests.Unit.csproj" />
+  </Folder>
+</Solution>
