@@ -1,0 +1,1196 @@
+openapi: 3.0.6
+info:
+  title: EXECORA Application API
+  description: |
+    Tenant-facing APIs for EXECORA application functionality.
+    These APIs are used by the Angular frontend application.
+  version: 1.0.0
+  contact:
+    name: EXECORA Platform Team
+
+servers:
+  - url: https://api.execora.com/api/app
+    description: Production
+  - url: https://api-staging.execora.com/api/app
+    description: Staging
+  - url: https://api-dev.execora.com/api/app
+    description: Development
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Projects
+    description: Project management
+  - name: Activities
+    description: Activity and work progress management
+  - name: Inspections
+    description: Quality inspections
+  - name: Issues
+    description: Issues and risk management
+  - name: NCR
+    description: Non-conformance reports
+  - name: DailyOperations
+    description: Daily reports and operations
+  - name: Workflows
+    description: Workflow engine
+  - name: BIM
+    description: BIM model integration
+  - name: Dashboards
+    description: Dashboards and analytics
+  - name: Notifications
+    description: User notifications
+  - name: Organizations
+    description: Organization and user management
+  - name: Attachments
+    description: File upload and management
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token containing TenantId and User claims
+
+  schemas:
+    # Common Types
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        details:
+          type: array
+          items:
+            type: string
+
+    # Project
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        code:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [Draft, Active, OnHold, Completed, Archived]
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        location:
+          type: string
+        projectManagerId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - status
+
+    ProjectCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        location:
+          type: string
+        latitude:
+          type: number
+          format: decimal
+        longitude:
+          type: number
+          format: decimal
+        projectManagerId:
+          type: string
+          format: uuid
+      required:
+        - name
+
+    # Activity
+    Activity:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        parentActivityId:
+          type: string
+          format: uuid
+        activityCode:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        plannedStartDate:
+          type: string
+          format: date
+        plannedEndDate:
+          type: string
+          format: date
+        progressPercentage:
+          type: number
+          format: decimal
+        status:
+          type: string
+          enum: [NotStarted, InProgress, ReadyForInspection, Approved, Rework, Completed, OnHold, Locked]
+        isBlocked:
+          type: boolean
+        assignedTo:
+          type: string
+          format: uuid
+      required:
+        - id
+        - projectId
+        - name
+        - status
+
+    ActivityUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        plannedStartDate:
+          type: string
+          format: date
+        plannedEndDate:
+          type: string
+          format: date
+        progressPercentage:
+          type: number
+          format: decimal
+          minimum: 0
+          maximum: 100
+        status:
+          type: string
+          enum: [NotStarted, InProgress, ReadyForInspection, Approved, Rework, Completed, OnHold]
+        assignedTo:
+          type: string
+          format: uuid
+
+    # Inspection
+    Inspection:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        activityId:
+          type: string
+          format: uuid
+        inspectionNumber:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        scheduledDate:
+          type: string
+          format: date
+        inspectionDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [Scheduled, InProgress, Passed, Failed, Cancelled]
+        inspectorId:
+          type: string
+          format: uuid
+        checklistResults:
+          type: object
+      required:
+        - id
+        - projectId
+        - title
+        - status
+
+    InspectionCreateRequest:
+      type: object
+      properties:
+        activityId:
+          type: string
+          format: uuid
+        inspectionTemplateId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        scheduledDate:
+          type: string
+          format: date
+        inspectorId:
+          type: string
+          format: uuid
+        location:
+          type: string
+      required:
+        - title
+        - scheduledDate
+        - inspectorId
+
+    InspectionSubmitRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [Passed, Failed]
+        checklistResults:
+          type: object
+        failedReason:
+          type: string
+        notes:
+          type: string
+      required:
+        - status
+        - checklistResults
+
+    # Issue
+    Issue:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        issueNumber:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum: [Safety, Quality, Schedule, Cost, Resource, Technical]
+        severity:
+          type: string
+          enum: [Low, Medium, High, Critical]
+        priority:
+          type: string
+          enum: [Low, Medium, High, Critical]
+        status:
+          type: string
+          enum: [Open, InProgress, UnderReview, Resolved, Closed, OnHold]
+        assignedTo:
+          type: string
+          format: uuid
+        raisedBy:
+          type: string
+          format: uuid
+        raisedAt:
+          type: string
+          format: date-time
+        dueDate:
+          type: string
+          format: date-time
+      required:
+        - id
+        - projectId
+        - title
+        - category
+        - severity
+
+    IssueCreateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum: [Safety, Quality, Schedule, Cost, Resource, Technical]
+        severity:
+          type: string
+          enum: [Low, Medium, High, Critical]
+        priority:
+          type: string
+          enum: [Low, Medium, High, Critical]
+        activityId:
+          type: string
+          format: uuid
+        assignedTo:
+          type: string
+          format: uuid
+        location:
+          type: string
+      required:
+        - title
+        - description
+        - category
+        - severity
+
+    # NCR
+    NonConformanceReport:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        ncrNumber:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum: [Material, Workmanship, Design, Documentation]
+        severity:
+          type: string
+          enum: [Minor, Major, Critical]
+        status:
+          type: string
+          enum: [Open, UnderReview, CorrectiveAction, Verification, Closed, Rejected]
+        activityId:
+          type: string
+          format: uuid
+        assignedTo:
+          type: string
+          format: uuid
+        raisedBy:
+          type: string
+          format: uuid
+        raisedAt:
+          type: string
+          format: date-time
+        dueDate:
+          type: string
+          format: date-time
+      required:
+        - id
+        - projectId
+        - title
+        - category
+
+    # Daily Report
+    DailyReport:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        reportDate:
+          type: string
+          format: date
+        weatherCondition:
+          type: string
+          enum: [Sunny, Cloudy, Rainy, Windy, Stormy]
+        temperatureMin:
+          type: number
+        temperatureMax:
+          type: number
+        totalManpower:
+          type: integer
+        workDescription:
+          type: string
+        constraints:
+          type: string
+        tomorrowPlan:
+          type: string
+        submittedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - projectId
+        - reportDate
+
+    # BIM Model
+    BimModel:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        modelName:
+          type: string
+        fileName:
+          type: string
+        urn:
+          type: string
+        status:
+          type: string
+          enum: [Uploading, Processing, Ready, Failed]
+        version:
+          type: integer
+
+    # Notification
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+            [
+              InspectionAssigned,
+              InspectionFailed,
+              NcrRaised,
+              IssueEscalated,
+              ActivityLocked,
+            ]
+        title:
+          type: string
+        message:
+          type: string
+        actionUrl:
+          type: string
+        isRead:
+          type: boolean
+        sentAt:
+          type: string
+          format: date-time
+
+    # Dashboard
+    ProjectDashboard:
+      type: object
+      properties:
+        projectId:
+          type: string
+          format: uuid
+        summary:
+          type: object
+          properties:
+            totalActivities:
+              type: integer
+            completedActivities:
+              type: integer
+            activeIssues:
+              type: integer
+            pendingInspections:
+              type: integer
+            openNcrs:
+              type: integer
+        progressByTrade:
+          type: array
+          items:
+            type: object
+            properties:
+              tradeName:
+                type: string
+              planned:
+                type: integer
+              completed:
+                type: integer
+              progressPercentage:
+                type: number
+        issuesBySeverity:
+          type: object
+          properties:
+            critical:
+              type: integer
+            high:
+              type: integer
+            medium:
+              type: integer
+            low:
+              type: integer
+        recentActivity:
+          type: array
+          items:
+            type: object
+
+paths:
+  # Project endpoints
+  /projects:
+    get:
+      summary: List projects
+      tags: [Projects]
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [Draft, Active, OnHold, Completed, Archived]
+        - name: pageNumber
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of projects
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Project'
+                  totalCount:
+                    type: integer
+    post:
+      summary: Create project
+      tags: [Projects]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectCreateRequest'
+      responses:
+        '201':
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+
+  /projects/{projectId}:
+    get:
+      summary: Get project details
+      tags: [Projects]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Project details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+    put:
+      summary: Update project
+      tags: [Projects]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectCreateRequest'
+      responses:
+        '200':
+          description: Project updated
+
+  /projects/{projectId}/dashboard:
+    get:
+      summary: Get project dashboard data
+      tags: [Dashboards]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDashboard'
+
+  # Activity endpoints
+  /projects/{projectId}/activities:
+    get:
+      summary: List project activities
+      tags: [Activities]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: tradeId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of activities
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Activity'
+    post:
+      summary: Create activity
+      tags: [Activities]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                parentActivityId:
+                  type: string
+                  format: uuid
+                tradeId:
+                  type: string
+                  format: uuid
+                plannedStartDate:
+                  type: string
+                  format: date
+                plannedEndDate:
+                  type: string
+                  format: date
+                assignedTo:
+                  type: string
+                  format: uuid
+              required:
+                - name
+      responses:
+        '201':
+          description: Activity created
+
+  /activities/{activityId}:
+    get:
+      summary: Get activity details
+      tags: [Activities]
+      parameters:
+        - name: activityId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Activity details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
+    put:
+      summary: Update activity
+      tags: [Activities]
+      parameters:
+        - name: activityId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityUpdateRequest'
+      responses:
+        '200':
+          description: Activity updated
+    delete:
+      summary: Delete activity
+      tags: [Activities]
+      parameters:
+        - name: activityId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Activity deleted
+
+  /activities/{activityId}/progress:
+    post:
+      summary: Update activity progress
+      tags: [Activities]
+      parameters:
+        - name: activityId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                progressPercentage:
+                  type: number
+                  format: decimal
+                  minimum: 0
+                  maximum: 100
+                notes:
+                  type: string
+              required:
+                - progressPercentage
+      responses:
+        '200':
+          description: Progress updated
+
+  # Inspection endpoints
+  /projects/{projectId}/inspections:
+    get:
+      summary: List project inspections
+      tags: [Inspections]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: scheduledStartDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: scheduledEndDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: List of inspections
+    post:
+      summary: Create inspection
+      tags: [Inspections]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InspectionCreateRequest'
+      responses:
+        '201':
+          description: Inspection created
+
+  /inspections/{inspectionId}:
+    get:
+      summary: Get inspection details
+      tags: [Inspections]
+      parameters:
+        - name: inspectionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Inspection details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Inspection'
+
+  /inspections/{inspectionId}/submit:
+    post:
+      summary: Submit inspection results
+      tags: [Inspections]
+      parameters:
+        - name: inspectionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InspectionSubmitRequest'
+      responses:
+        '200':
+          description: Inspection submitted
+
+  # Issue endpoints
+  /projects/{projectId}/issues:
+    get:
+      summary: List project issues
+      tags: [Issues]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: severity
+          in: query
+          schema:
+            type: string
+        - name: assignedToMe
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: List of issues
+    post:
+      summary: Create issue
+      tags: [Issues]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueCreateRequest'
+      responses:
+        '201':
+          description: Issue created
+
+  /issues/{issueId}:
+    get:
+      summary: Get issue details
+      tags: [Issues]
+    put:
+      summary: Update issue
+      tags: [Issues]
+    delete:
+      summary: Delete issue
+      tags: [Issues]
+
+  # NCR endpoints
+  /projects/{projectId}/ncrs:
+    get:
+      summary: List project NCRs
+      tags: [NCR]
+    post:
+      summary: Create NCR
+      tags: [NCR]
+
+  /ncrs/{ncrId}:
+    get:
+      summary: Get NCR details
+      tags: [NCR]
+
+  /ncrs/{ncrId}/rca:
+    put:
+      summary: Submit root cause analysis
+      tags: [NCR]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rootCauseAnalysis:
+                  type: string
+                correctiveAction:
+                  type: string
+                preventiveAction:
+                  type: string
+              required:
+                - rootCauseAnalysis
+
+  /ncrs/{ncrId}/close:
+    post:
+      summary: Close NCR
+      tags: [NCR]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                verificationNotes:
+                  type: string
+              required:
+                - verificationNotes
+
+  # Daily Operations endpoints
+  /projects/{projectId}/daily-reports:
+    get:
+      summary: List daily reports
+      tags: [DailyOperations]
+    post:
+      summary: Create daily report
+      tags: [DailyOperations]
+
+  /projects/{projectId}/daily-reports/today:
+    get:
+      summary: Get today's daily report
+      tags: [DailyOperations]
+
+  # BIM endpoints
+  /projects/{projectId}/bim-models:
+    get:
+      summary: List BIM models
+      tags: [BIM]
+    post:
+      summary: Upload BIM model
+      tags: [BIM]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                modelName:
+                  type: string
+
+  /bim-models/{modelId}/viewer-token:
+    get:
+      summary: Get APS viewer token
+      tags: [BIM]
+      responses:
+        '200':
+          description: Viewer token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  urn:
+                    type: string
+                  expiresAt:
+                    type: string
+                    format: date-time
+
+  # Notification endpoints
+  /notifications:
+    get:
+      summary: Get user notifications
+      tags: [Notifications]
+      responses:
+        '200':
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Notification'
+                  unreadCount:
+                    type: integer
+
+  /notifications/mark-all-read:
+    post:
+      summary: Mark all notifications as read
+      tags: [Notifications]
+      responses:
+        '204':
+          description: All marked as read
+
+  /notifications/{notificationId}/read:
+    post:
+      summary: Mark notification as read
+      tags: [Notifications]
+
+  # Organization endpoints
+  /organizations:
+    get:
+      summary: List organizations
+      tags: [Organizations]
+    post:
+      summary: Create organization
+      tags: [Organizations]
+
+  /organizations/{organizationId}:
+    get:
+      summary: Get organization details
+      tags: [Organizations]
+    put:
+      summary: Update organization
+      tags: [Organizations]
+
+  /organizations/{organizationId}/users:
+    get:
+      summary: List organization users
+      tags: [Organizations]
+
+  /users/invite:
+    post:
+      summary: Invite user to organization
+      tags: [Organizations]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                role:
+                  type: string
+                  enum:
+                    [
+                      TenantAdmin,
+                      ProjectAdmin,
+                      ProjectManager,
+                      QAQC,
+                      SiteEngineer,
+                    ]
+                projectId:
+                  type: string
+                  format: uuid
+              required:
+                - email
+                - role
+
+  # File upload endpoints
+  /attachments/upload:
+    post:
+      summary: Upload file attachment
+      tags: [Attachments]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                entityType:
+                  type: string
+                  enum: [Activity, Inspection, NCR, Issue, DailyReport]
+                entityId:
+                  type: string
+                  format: uuid
+                attachmentType:
+                  type: string
+              required:
+                - file
+                - entityType
+                - entityId
+      responses:
+        '201':
+          description: File uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  fileName:
+                    type: string
+                  fileUrl:
+                    type: string
+                  fileSizeBytes:
+                    type: integer

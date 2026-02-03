@@ -1,0 +1,499 @@
+openapi: 3.0.6
+info:
+  title: EXECORA System Administration API
+  description: |
+    System-level APIs for EXECORA platform administration.
+    These APIs are used by EXECORA internal staff for tenant and subscription management.
+  version: 1.0.0
+  contact:
+    name: EXECORA Platform Team
+
+servers:
+  - url: https://api.execora.com/api/sys
+    description: Production
+  - url: https://api-staging.execora.com/api/sys
+    description: Staging
+  - url: https://api-dev.execora.com/api/sys
+    description: Development
+
+security:
+  - BearerAuth: []
+  - SystemAdminKey: []
+
+tags:
+  - name: Tenants
+    description: Tenant (organization) management
+  - name: Subscriptions
+    description: Subscription and billing management
+  - name: Users
+    description: Global user management
+  - name: Configuration
+    description: Platform-wide configuration
+  - name: Audit
+    description: System audit logs
+  - name: Impersonation
+    description: Tenant impersonation for support
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    SystemAdminKey:
+      type: apiKey
+      in: header
+      name: X-System-Admin-Key
+
+  schemas:
+    Tenant:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 100
+        slug:
+          type: string
+          maxLength: 50
+        subscriptionPlan:
+          type: string
+          enum: [Core, Professional, Enterprise]
+        subscriptionStatus:
+          type: string
+          enum: [Active, Suspended, Trial, PastDue]
+        subscriptionExpiry:
+          type: string
+          format: date-time
+        maxProjects:
+          type: integer
+        maxUsers:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - slug
+        - subscriptionPlan
+        - subscriptionStatus
+
+    TenantCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        slug:
+          type: string
+          maxLength: 50
+          pattern: '^[a-z0-9-]+$'
+        subscriptionPlan:
+          type: string
+          enum: [Core, Professional, Enterprise]
+        subscriptionExpiry:
+          type: string
+          format: date-time
+        maxProjects:
+          type: integer
+          minimum: 1
+        maxUsers:
+          type: integer
+          minimum: 1
+      required:
+        - name
+        - slug
+        - subscriptionPlan
+
+    TenantUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        subscriptionPlan:
+          type: string
+          enum: [Core, Professional, Enterprise]
+        subscriptionStatus:
+          type: string
+          enum: [Active, Suspended, Trial, PastDue]
+        subscriptionExpiry:
+          type: string
+          format: date-time
+        maxProjects:
+          type: integer
+          minimum: 1
+        maxUsers:
+          type: integer
+          minimum: 1
+
+    PagedResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: {}
+        totalCount:
+          type: integer
+        pageSize:
+          type: integer
+        pageNumber:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+        - items
+        - totalCount
+        - pageSize
+        - pageNumber
+        - totalPages
+
+    ImpersonationToken:
+      type: object
+      properties:
+        token:
+          type: string
+        tenantId:
+          type: string
+          format: uuid
+        tenantName:
+          type: string
+        userId:
+          type: string
+          format: uuid
+        expiresAt:
+          type: string
+          format: date-time
+      required:
+        - token
+        - tenantId
+        - tenantName
+        - expiresAt
+
+    ImpersonationRequest:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        reason:
+          type: string
+          maxLength: 500
+        durationMinutes:
+          type: integer
+          minimum: 5
+          maximum: 480
+      required:
+        - tenantId
+        - userId
+        - reason
+
+paths:
+  /tenants:
+    get:
+      summary: List all tenants
+      tags: [Tenants]
+      parameters:
+        - name: pageNumber
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: subscriptionStatus
+          in: query
+          schema:
+            type: string
+            enum: [Active, Suspended, Trial, PastDue]
+        - name: subscriptionPlan
+          in: query
+          schema:
+            type: string
+            enum: [Core, Professional, Enterprise]
+      responses:
+        '200':
+          description: List of tenants
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Tenant'
+    post:
+      summary: Create a new tenant
+      tags: [Tenants]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantCreateRequest'
+      responses:
+        '201':
+          description: Tenant created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+        '400':
+          description: Invalid request
+        '409':
+          description: Tenant slug already exists
+
+  /tenants/{tenantId}:
+    get:
+      summary: Get tenant by ID
+      tags: [Tenants]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Tenant details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+        '404':
+          description: Tenant not found
+    put:
+      summary: Update tenant
+      tags: [Tenants]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantUpdateRequest'
+      responses:
+        '200':
+          description: Tenant updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+        '404':
+          description: Tenant not found
+    delete:
+      summary: Delete tenant (soft delete)
+      tags: [Tenants]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Tenant deleted
+        '404':
+          description: Tenant not found
+
+  /tenants/{tenantId}/subscription:
+    put:
+      summary: Update tenant subscription
+      tags: [Subscriptions]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plan:
+                  type: string
+                  enum: [Core, Professional, Enterprise]
+                status:
+                  type: string
+                  enum: [Active, Suspended, Trial, PastDue]
+                expiryDate:
+                  type: string
+                  format: date-time
+                maxProjects:
+                  type: integer
+                maxUsers:
+                  type: integer
+      responses:
+        '200':
+          description: Subscription updated
+        '404':
+          description: Tenant not found
+
+  /tenants/{tenantId}/usage:
+    get:
+      summary: Get tenant usage statistics
+      tags: [Tenants]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Usage statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  projectCount:
+                    type: integer
+                  userCount:
+                    type: integer
+                  activeProjectCount:
+                    type: integer
+                  storageUsedBytes:
+                    type: integer
+                  lastActivityAt:
+                    type: string
+                    format: date-time
+
+  /impersonation:
+    post:
+      summary: Create impersonation token
+      tags: [Impersonation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImpersonationRequest'
+      responses:
+        '200':
+          description: Impersonation token created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImpersonationToken'
+        '400':
+          description: Invalid request
+        '404':
+          description: Tenant or user not found
+
+  /impersonation/{token}/revoke:
+    post:
+      summary: Revoke impersonation token
+      tags: [Impersonation]
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Token revoked
+
+  /audit/logs:
+    get:
+      summary: Get system audit logs
+      tags: [Audit]
+      parameters:
+        - name: pageNumber
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Audit logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        tenantId:
+                          type: string
+                          format: uuid
+                        tenantName:
+                          type: string
+                        entityName:
+                          type: string
+                        entityId:
+                          type: string
+                          format: uuid
+                        action:
+                          type: string
+                          enum: [Created, Updated, Deleted, StateChanged]
+                        changedBy:
+                          type: string
+                          format: uuid
+                        changedByEmail:
+                          type: string
+                        changedAt:
+                          type: string
+                          format: date-time
+                  totalCount:
+                    type: integer

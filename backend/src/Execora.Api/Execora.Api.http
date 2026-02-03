@@ -1,0 +1,6 @@
+@Execora.Api_HostAddress = http://localhost:5268
+
+GET {{Execora.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
