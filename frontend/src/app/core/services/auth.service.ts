@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { map, switchMap, tap, catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { User, UserProfile, Tenant, TenantRole } from '../models';
+import { RegisterRequest, RegisterResponse } from '../models/auth.model';
 
 /**
  * Authentication tokens
@@ -21,15 +22,6 @@ export interface LoginRequest {
   password: string;
 }
 
-/**
- * Register request
- */
-export interface RegisterRequest {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-}
 
 /**
  * Token response from API
@@ -147,18 +139,8 @@ export class AuthService {
   /**
    * Register a new user
    */
-  register(data: RegisterRequest): Observable<UserProfile> {
-    return this.apiService.post<TokenResponse>('/auth/register', data).pipe(
-      tap(response => this.storeTokens(response)),
-      map(response => response.user),
-      tap(user => this.updateAuthState({
-        isAuthenticated: true,
-        user,
-        currentTenant: this.getStoredTenant(),
-        currentRole: this.getStoredRole(),
-        allTenants: user.tenantUsers.map(tu => tu.tenant!).filter(t => t)
-      }))
-    );
+  register(data: RegisterRequest): Observable<RegisterResponse> {
+    return this.apiService.post<RegisterResponse>('/auth/register', data);
   }
 
   /**

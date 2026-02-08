@@ -1,6 +1,7 @@
 using Execora.Api.Tests.Helpers;
-using Execora.Core.Entities;
+using Execora.Application.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit.Abstractions;
 
 namespace Execora.Api.Tests.Controllers.Auth;
@@ -59,9 +60,9 @@ public class RegisterTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.NotNull(result.Value);
 
         dynamic data = result.Value!;
-        Assert.Equal("test@example.com", data.email);
-        Assert.Equal("John", data.firstName);
-        Assert.Equal("Doe", data.lastName);
+        Assert.Equal("test@example.com", data.Email);
+        Assert.Equal("John", data.FirstName);
+        Assert.Equal("Doe", data.LastName);
     }
 
     [Fact]
@@ -84,7 +85,7 @@ public class RegisterTests : IClassFixture<WebApplicationFactory<Program>>
         var response = await _client.PostAsJsonAsync("/auth/register", request);
 
         // Assert
-        Assert.Equal(System.Net.HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Equal(409, (int)response.StatusCode);
 
         var error = await response.Content.ReadFromJsonAsync<ProblemDetails>();
         Assert.NotNull(error);

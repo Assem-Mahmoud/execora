@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Execora.Auth\Execora.Auth.csproj" />
     <ProjectReference Include="..\..\src\Execora.Core\Execora.Core.csproj" />
     <ProjectReference Include="..\..\src\Execora.Application\Execora.Application.csproj" />
     <ProjectReference Include="..\..\src\Execora.Infrastructure\Execora.Infrastructure.csproj" />
