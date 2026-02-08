@@ -25,6 +25,15 @@ public class ExecoraDbContext : IdentityDbContext<IdentityUser>
 
     #endregion
 
+    #region Authentication & User Management
+
+    public DbSet<Invitation> Invitations { get; set; } = null!;
+    public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
+    public DbSet<AuditLog> AuditLogs { get; set; } = null!;
+    public DbSet<PasswordHistory> PasswordHistory { get; set; } = null!;
+
+    #endregion
+
     #region Organization & Project Management (Module 01)
 
     //public DbSet<Project> Projects { get; set; } = null!;
@@ -161,6 +170,20 @@ public class ExecoraDbContext : IdentityDbContext<IdentityUser>
             .HasForeignKey(o => o.ParentOrganizationId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // Invitation - Tenant (Many-to-One)
+        builder.Entity<Invitation>()
+            .HasOne(i => i.Tenant)
+            .WithMany()
+            .HasForeignKey(i => i.TenantId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // RefreshToken - User (Many-to-One)
+        builder.Entity<RefreshToken>()
+            .HasOne(rt => rt.User)
+            .WithMany()
+            .HasForeignKey(rt => rt.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         // Unique constraint on TenantUser combination
         builder.Entity<TenantUser>()
             .HasIndex(tu => new { tu.TenantId, tu.UserId })
@@ -198,6 +221,60 @@ public class ExecoraDbContext : IdentityDbContext<IdentityUser>
         builder.Entity<Organization>()
             .HasIndex(o => o.TenantId)
             .HasDatabaseName("IX_Organizations_TenantId");
+
+        // Invitation indexes
+        builder.Entity<Invitation>()
+            .HasIndex(i => new { i.TenantId, i.Status })
+            .HasDatabaseName("IX_Invitations_TenantId_Status");
+
+        builder.Entity<Invitation>()
+            .HasIndex(i => i.Token)
+            .IsUnique()
+            .HasDatabaseName("IX_Invitations_Token");
+
+        builder.Entity<Invitation>()
+            .HasIndex(i => new { i.Email, i.TenantId })
+            .HasDatabaseName("IX_Invitations_Email_TenantId");
+
+        // RefreshToken indexes
+        builder.Entity<RefreshToken>()
+            .HasIndex(rt => rt.UserId)
+            .HasDatabaseName("IX_RefreshTokens_UserId");
+
+        builder.Entity<RefreshToken>()
+            .HasIndex(rt => rt.TokenHash)
+            .IsUnique()
+            .HasDatabaseName("IX_RefreshTokens_TokenHash");
+
+        builder.Entity<RefreshToken>()
+            .HasIndex(rt => rt.ExpiresAt)
+            .HasDatabaseName("IX_RefreshTokens_ExpiresAt");
+
+        // AuditLog indexes
+        builder.Entity<AuditLog>()
+            .HasIndex(al => new { al.TenantId, al.ChangedAt })
+            .HasDatabaseName("IX_AuditLogs_TenantId_ChangedAt");
+
+        builder.Entity<AuditLog>()
+            .HasIndex(al => new { al.EntityName, al.EntityId })
+            .HasDatabaseName("IX_AuditLogs_EntityName_EntityId");
+
+        builder.Entity<AuditLog>()
+            .HasIndex(al => al.ChangedBy)
+            .HasDatabaseName("IX_AuditLogs_ChangedBy");
+
+        builder.Entity<AuditLog>()
+            .HasIndex(al => new { al.ProjectId, al.ChangedAt })
+            .HasDatabaseName("IX_AuditLogs_ProjectId_ChangedAt");
+
+        // PasswordHistory indexes
+        builder.Entity<PasswordHistory>()
+            .HasIndex(ph => ph.UserId)
+            .HasDatabaseName("IX_PasswordHistory_UserId");
+
+        builder.Entity<PasswordHistory>()
+            .HasIndex(ph => new { ph.UserId, ph.CreatedAt })
+            .HasDatabaseName("IX_PasswordHistory_UserId_CreatedAt");
     }
 
     /// <summary>

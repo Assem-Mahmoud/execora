@@ -61,7 +61,7 @@ public class TenantRoleAuthorizationHandler : AuthorizationHandler<TenantRoleReq
         };
 
         var userLevel = roleHierarchy.GetValueOrDefault(userRole, int.MaxValue);
-        return requiredRoles.Any(required => roleHierarchy.GetValueOrDefault(required, int.MaxValue) > userLevel);
+        return requiredRoles.Any(required => roleHierarchy.GetValueOrDefault(required, int.MaxValue) >= userLevel);
     }
 }
 
