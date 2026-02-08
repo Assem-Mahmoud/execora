@@ -6,6 +6,7 @@ using Execora.Core.Interfaces;
 using Execora.Infrastructure.Data;
 using Execora.Infrastructure.Identity;
 using Execora.Infrastructure.Repositories;
+using Execora.Infrastructure.Services.Email;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -176,9 +177,21 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
     services.AddScoped<IRefreshTokenService, RefreshTokenService>();
     services.AddScoped<IAuditLogService, AuditLogService>();
 
+    // Register Auth Services (Phase 2)
+    services.AddScoped<IPasswordHasher, PasswordHasher>();
+
     // Register Repositories
     services.AddScoped<ITenantRepository, TenantRepository>();
     services.AddScoped<IUserRepository, UserRepository>();
+
+    // Register Additional Repositories (Phase 2)
+    services.AddScoped<IInvitationRepository, InvitationRepository>();
+    services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+    services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+    services.AddScoped<IPasswordHistoryRepository, PasswordHistoryRepository>();
+
+    // Register Email Service (Phase 2)
+    services.AddScoped<IEmailService, SmtpEmailService>();
 
     // Health Checks
     services.AddHealthChecks()
@@ -199,6 +212,9 @@ void ConfigurePipeline(WebApplication app, IHostEnvironment environment)
         app.UseHttpsRedirection();
         app.UseHsts();
     }
+
+    // Rate limiting middleware (Phase 2)
+    app.UseMiddleware<RateLimitMiddleware>();
 
     // Tenant resolution middleware (must be before authentication)
     app.UseTenantResolution();

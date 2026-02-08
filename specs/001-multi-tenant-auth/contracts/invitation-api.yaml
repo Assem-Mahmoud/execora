@@ -1,0 +1,629 @@
+openapi: 3.0.6
+info:
+  title: EXECORA User & Tenant Management API
+  description: |
+    Tenant-facing APIs for user invitation, tenant management, and profile management.
+    These endpoints require authentication and tenant context.
+  version: 1.0.0
+  contact:
+    name: EXECORA Platform Team
+
+servers:
+  - url: https://api.execora.com/api/app
+    description: Production
+  - url: https://api-staging.execora.com/api/app
+    description: Staging
+  - url: https://api-dev.execora.com/api/app
+    description: Development
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Invitations
+    description: User invitation management
+  - name: Users
+    description: Tenant user management
+  - name: Tenants
+    description: Multi-tenant access management
+  - name: Profile
+    description: Current user profile
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token containing TenantId and User claims
+
+  schemas:
+    # Common Types
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        details:
+          type: array
+          items:
+            type: string
+
+    # Invitations
+    InvitationCreateRequest:
+      type: object
+      required:
+        - email
+        - role
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email address of user to invite
+        role:
+          type: string
+          enum: [TenantAdmin, ProjectAdmin, ProjectManager, QAQC, SiteEngineer]
+          description: Role to assign within tenant
+        message:
+          type: string
+          maxLength: 500
+          description: Optional custom message for invitation email
+
+    InvitationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [TenantAdmin, ProjectAdmin, ProjectManager, QAQC, SiteEngineer]
+        status:
+          type: string
+          enum: [Pending, Accepted, Expired, Cancelled]
+        expiresAt:
+          type: string
+          format: date-time
+        invitedBy:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            firstName:
+              type: string
+            lastName:
+              type: string
+        invitedAt:
+          type: string
+          format: date-time
+        acceptedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    InvitationsListResponse:
+      type: object
+      properties:
+        invitations:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvitationResponse'
+        total:
+          type: integer
+          description: Total count of pending invitations
+
+    # Users
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phoneNumber:
+          type: string
+          nullable: true
+        role:
+          type: string
+          enum: [SystemAdmin, TenantAdmin, ProjectAdmin, ProjectManager, QAQC, SiteEngineer]
+        isActive:
+          type: boolean
+        joinedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    UsersListResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserResponse'
+        total:
+          type: integer
+
+    UpdateUserRoleRequest:
+      type: object
+      required:
+        - role
+      properties:
+        role:
+          type: string
+          enum: [TenantAdmin, ProjectAdmin, ProjectManager, QAQC, SiteEngineer]
+
+    # Tenant
+    TenantResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        subscriptionPlan:
+          type: string
+          enum: [Core, Professional, Enterprise]
+        role:
+          type: string
+          enum: [SystemAdmin, TenantAdmin, ProjectAdmin, ProjectManager, QAQC, SiteEngineer]
+          description: User's role within this tenant
+
+    TenantsListResponse:
+      type: object
+      properties:
+        tenants:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenantResponse'
+
+    SwitchTenantRequest:
+      type: object
+      required:
+        - tenantId
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+          description: Target tenant ID
+
+    SwitchTenantResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+        tenant:
+          $ref: '#/components/schemas/TenantResponse'
+
+    # Profile
+    UserProfileResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phoneNumber:
+          type: string
+          nullable: true
+        emailConfirmed:
+          type: boolean
+        lastLoginAt:
+          type: string
+          format: date-time
+          nullable: true
+        currentTenant:
+          $ref: '#/components/schemas/TenantResponse'
+        availableTenants:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenantResponse'
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 50
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 50
+        phoneNumber:
+          type: string
+          maxLength: 20
+          nullable: true
+
+paths:
+  /users/invite:
+    post:
+      tags:
+        - Invitations
+      summary: Invite user to tenant
+      description: |
+        Sends an invitation email to a user to join the current tenant.
+        Requires TenantAdmin or TenantAdmin role.
+      operationId: inviteUser
+      responses:
+        '201':
+          description: Invitation sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationResponse'
+        '400':
+          description: Invalid request or user already in tenant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Too many invitations (rate limited)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationCreateRequest'
+
+  /users/invitations:
+    get:
+      tags:
+        - Invitations
+      summary: List pending invitations
+      description: |
+        Returns all pending invitations for the current tenant.
+        Requires TenantAdmin role.
+      operationId: listInvitations
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [Pending, Accepted, Expired, Cancelled, All]
+            default: Pending
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of invitations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationsListResponse'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/invitations/{invitationId}:
+    delete:
+      tags:
+        - Invitations
+      summary: Cancel invitation
+      description: |
+        Cancels a pending invitation. Only the inviter or TenantAdmin can cancel.
+      operationId: cancelInvitation
+      parameters:
+        - name: invitationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Invitation cancelled
+        '403':
+          description: Insufficient permissions
+        '404':
+          description: Invitation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags:
+        - Invitations
+      summary: Resend invitation
+      description: |
+        Resends an invitation email with a new expiration time.
+        Previous invitation link is invalidated.
+      operationId: resendInvitation
+      parameters:
+        - name: invitationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Invitation resent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationResponse'
+        '403':
+          description: Insufficient permissions
+        '404':
+          description: Invitation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users:
+    get:
+      tags:
+        - Users
+      summary: List tenant users
+      description: |
+        Returns all users in the current tenant.
+        Requires TenantAdmin role.
+      operationId: listUsers
+      parameters:
+        - name: search
+          in: query
+          description: Search by name or email
+          schema:
+            type: string
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [TenantAdmin, ProjectAdmin, ProjectManager, QAQC, SiteEngineer]
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersListResponse'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/{userId}:
+    put:
+      tags:
+        - Users
+      summary: Update user role
+      description: |
+        Updates a user's role within the tenant.
+        Requires TenantAdmin role.
+      operationId: updateUserRole
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User role updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Cannot remove last admin or invalid role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRoleRequest'
+
+    delete:
+      tags:
+        - Users
+      summary: Remove user from tenant
+      description: |
+        Removes a user from the current tenant.
+        Cannot remove the last TenantAdmin.
+      operationId: removeUser
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: User removed
+        '400':
+          description: Cannot remove last admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Insufficient permissions or removing self
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tenants:
+    get:
+      tags:
+        - Tenants
+      summary: List user's tenants
+      description: |
+        Returns all tenants the authenticated user has access to.
+      operationId: listTenants
+      responses:
+        '200':
+          description: List of tenants
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantsListResponse'
+
+  /tenants/{tenantId}/switch:
+    post:
+      tags:
+        - Tenants
+      summary: Switch active tenant
+      description: |
+        Switches the user's active tenant context.
+        Returns new tokens with updated tenant claims.
+      operationId: switchTenant
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Tenant switched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SwitchTenantResponse'
+        '403':
+          description: User does not have access to this tenant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Tenant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/me:
+    get:
+      tags:
+        - Profile
+      summary: Get current user profile
+      description: |
+        Returns the authenticated user's profile information
+        including current and available tenants.
+      operationId: getProfile
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+
+    put:
+      tags:
+        - Profile
+      summary: Update current user profile
+      description: |
+        Updates the authenticated user's profile information.
+      operationId: updateProfile
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'

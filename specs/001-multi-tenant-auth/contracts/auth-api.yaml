@@ -1,0 +1,602 @@
+openapi: 3.0.6
+info:
+  title: EXECORA Authentication API
+  description: |
+    Public authentication and user management APIs for EXECORA platform.
+    These endpoints are used for user registration, login, password management, and email verification.
+  version: 1.0.0
+  contact:
+    name: EXECORA Platform Team
+
+servers:
+  - url: https://api.execora.com/api/auth
+    description: Production
+  - url: https://api-staging.execora.com/api/auth
+    description: Staging
+  - url: https://api-dev.execora.com/api/auth
+    description: Development
+
+tags:
+  - name: Registration
+    description: User registration and tenant creation
+  - name: Authentication
+    description: Login and token management
+  - name: Password
+    description: Password reset and management
+  - name: Verification
+    description: Email verification
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # Common Types
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        details:
+          type: array
+          items:
+            type: string
+
+    # Registration
+    RegisterRequest:
+      type: object
+      required:
+        - organizationName
+        - email
+        - password
+        - firstName
+        - lastName
+      properties:
+        organizationName:
+          type: string
+          minLength: 2
+          maxLength: 100
+          description: Name of the organization/tenant
+          example: Acme Construction Corp
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          description: User email address (must be unique)
+          example: user@acme.com
+        password:
+          type: string
+          minLength: 12
+          maxLength: 128
+          description: Password (12+ chars, mixed case, number, special char)
+          example: SecureP@ssw0rd123!
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: John
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: Doe
+        phoneNumber:
+          type: string
+          maxLength: 20
+          example: +1234567890
+
+    RegisterResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        requiresEmailVerification:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Registration successful. Please check your email to verify your account."
+
+    # Authentication
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        rememberMe:
+          type: boolean
+          default: false
+          description: Extend refresh token lifetime to 30 days
+
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token (15 minute expiry)
+        refreshToken:
+          type: string
+          description: Refresh token (7 day standard, 30 day if rememberMe=true)
+        expiresIn:
+          type: integer
+          description: Access token expiry in seconds
+          example: 900
+        user:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            email:
+              type: string
+            firstName:
+              type: string
+            lastName:
+              type: string
+        tenant:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+            slug:
+              type: string
+        availableTenants:
+          type: array
+          description: List of tenants user has access to (if multi-tenant)
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              name:
+                type: string
+              slug:
+                type: string
+              role:
+                type: string
+                enum: [SystemAdmin, TenantAdmin, ProjectAdmin, ProjectManager, QAQC, SiteEngineer]
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          description: Current refresh token
+
+    RefreshTokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+          description: New refresh token (rotation)
+        expiresIn:
+          type: integer
+          example: 900
+
+    # Password Reset
+    ForgotPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+
+    ForgotPasswordResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "If an account exists with this email, a password reset link has been sent."
+
+    ResetPasswordRequest:
+      type: object
+      required:
+        - token
+        - newPassword
+      properties:
+        token:
+          type: string
+          description: Password reset token from email
+        newPassword:
+          type: string
+          minLength: 12
+          maxLength: 128
+
+    ResetPasswordResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Password has been reset successfully."
+
+    ChangePasswordRequest:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+          minLength: 12
+          maxLength: 128
+
+    ChangePasswordResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Password changed successfully."
+
+    # Email Verification
+    VerifyEmailRequest:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: Email verification token
+
+    VerifyEmailResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Email verified successfully. You can now log in."
+
+    ResendVerificationRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+
+    ResendVerificationResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "If an account exists with this email, a verification link has been sent."
+
+paths:
+  /register:
+    post:
+      tags:
+        - Registration
+      summary: Register a new user and create tenant
+      description: |
+        Creates a new user account and tenant organization. The registering user
+        becomes the first TenantAdmin of the new tenant. An email verification
+        link is sent to the provided email address.
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Too many registration attempts from this IP
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: Authenticate user
+      description: |
+        Authenticates a user with email and password. Returns JWT access token
+        and refresh token. If user belongs to multiple tenants, returns list
+        of available tenants.
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Account inactive or email not verified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '423':
+          description: Account locked due to failed attempts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Too many login attempts from this IP
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: |
+        Exchanges a valid refresh token for a new access token. Implements
+        refresh token rotation - old token is invalidated and new token issued.
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshTokenResponse'
+        '401':
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      description: Invalidates the refresh token
+      operationId: logout
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '204':
+          description: Logout successful
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /forgot-password:
+    post:
+      tags:
+        - Password
+      summary: Request password reset
+      description: |
+        Sends a password reset email with time-limited reset token.
+        For security, does not reveal whether email exists in system.
+      operationId: forgotPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Password reset initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForgotPasswordResponse'
+        '429':
+          description: Too many password reset requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /reset-password:
+    post:
+      tags:
+        - Password
+      summary: Reset password with token
+      description: |
+        Resets user password using token from password reset email.
+        Token expires after 1 hour. Invalidates all existing refresh tokens.
+      operationId: resetPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResetPasswordResponse'
+        '400':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /change-password:
+    post:
+      tags:
+        - Password
+      summary: Change password (authenticated)
+      description: |
+        Changes password for authenticated user. Current password required.
+        Cannot reuse last 5 passwords. Invalidates all refresh tokens.
+      operationId: changePassword
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangePasswordResponse'
+        '400':
+          description: Current password incorrect or new password doesn't meet requirements
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /verify-email:
+    post:
+      tags:
+        - Verification
+      summary: Verify email address
+      description: |
+        Verifies user email using token sent during registration.
+        Token expires after 24 hours.
+      operationId: verifyEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+      responses:
+        '200':
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyEmailResponse'
+        '400':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /resend-verification:
+    post:
+      tags:
+        - Verification
+      summary: Resend verification email
+      description: |
+        Sends a new email verification token. Previous tokens are invalidated.
+      operationId: resendVerification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendVerificationRequest'
+      responses:
+        '200':
+          description: Verification email sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResendVerificationResponse'
+        '429':
+          description: Too many resend requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
