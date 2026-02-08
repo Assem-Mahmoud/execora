@@ -104,120 +104,27 @@ public class RegistrationService : IRegistrationService
             JoinedAt = DateTime.UtcNow
         };
 
-        // Use transaction to ensure all operations succeed or fail together
-        var shouldCommit = true;
-
+        // Execute registration operations within transaction if needed
         if (_dbContext.Database.CurrentTransaction == null)
         {
             using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
 
             try
             {
-                await _userRepository.AddAsync(user, cancellationToken);
-                await _tenantRepository.AddAsync(tenant, cancellationToken);
-                await _userRepository.AddTenantUserAsync(tenantUser, cancellationToken);
-
-                // Log registration
-                await _auditLogService.LogCreateAsync(
-                    tenant.Id,
-                    "User",
-                    user.Id,
-                    new
-                    {
-                        user.Email,
-                        user.FirstName,
-                        user.LastName,
-                        Tenant = new { tenant.Id, tenant.Name }
-                    },
-                    user.Id,
-                    null,
-                    null,
-                    null,
-                    cancellationToken);
-
-                // Generate email verification token
-                var emailVerificationToken = GenerateEmailVerificationToken(user.Id);
-
-                // Send verification email (Phase 4 implementation)
-                await _emailService.SendEmailVerificationAsync(
-                    user.Email,
-                    emailVerificationToken,
-                    $"{user.FirstName} {user.LastName}",
-                    cancellationToken);
-
-                // Commit transaction
+                var response = await ExecuteRegistrationOperationsAsync(user, tenant, tenantUser, cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
-
-                return new RegisterResponse
-                {
-                    UserId = user.Id,
-                    TenantId = tenant.Id,
-                    Email = user.Email,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    OrganizationName = tenant.Name,
-                    Role = tenantUser.Role.ToString(),
-                    EmailConfirmed = user.EmailConfirmed,
-                    EmailVerificationToken = emailVerificationToken
-                };
+                return response;
             }
             catch (Exception)
             {
-                shouldCommit = false;
-                if (transaction != null)
-                {
-                    await transaction.RollbackAsync(cancellationToken);
-                }
+                await transaction.RollbackAsync(cancellationToken);
                 throw;
             }
         }
         else
         {
             // Transaction already exists (e.g., in tests or nested operations)
-            await _userRepository.AddAsync(user, cancellationToken);
-            await _tenantRepository.AddAsync(tenant, cancellationToken);
-            await _userRepository.AddTenantUserAsync(tenantUser, cancellationToken);
-
-            // Log registration
-            await _auditLogService.LogCreateAsync(
-                tenant.Id,
-                "User",
-                user.Id,
-                new
-                {
-                    user.Email,
-                    user.FirstName,
-                    user.LastName,
-                    Tenant = new { tenant.Id, tenant.Name }
-                },
-                user.Id,
-                null,
-                null,
-                null,
-                cancellationToken);
-
-            // Generate email verification token
-            var emailVerificationToken = GenerateEmailVerificationToken(user.Id);
-
-            // Send verification email (Phase 4 implementation)
-            await _emailService.SendEmailVerificationAsync(
-                user.Email,
-                emailVerificationToken,
-                $"{user.FirstName} {user.LastName}",
-                cancellationToken);
-
-            return new RegisterResponse
-            {
-                UserId = user.Id,
-                TenantId = tenant.Id,
-                Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                OrganizationName = tenant.Name,
-                Role = tenantUser.Role.ToString(),
-                EmailConfirmed = user.EmailConfirmed,
-                EmailVerificationToken = emailVerificationToken
-            };
+            return await ExecuteRegistrationOperationsAsync(user, tenant, tenantUser, cancellationToken);
         }
     }
 
@@ -284,6 +191,61 @@ public class RegistrationService : IRegistrationService
             null,
             null,
             cancellationToken);
+    }
+
+    /// <summary>
+    /// Execute the core registration operations (adding user, tenant, tenant-user relationship, and logging)
+    /// </summary>
+    private async Task<RegisterResponse> ExecuteRegistrationOperationsAsync(
+        User user,
+        Tenant tenant,
+        TenantUser tenantUser,
+        CancellationToken cancellationToken = default)
+    {
+        await _userRepository.AddAsync(user, cancellationToken);
+        await _tenantRepository.AddAsync(tenant, cancellationToken);
+        await _userRepository.AddTenantUserAsync(tenantUser, cancellationToken);
+
+        // Log registration
+        await _auditLogService.LogCreateAsync(
+            tenant.Id,
+            "User",
+            user.Id,
+            new
+            {
+                user.Email,
+                user.FirstName,
+                user.LastName,
+                Tenant = new { tenant.Id, tenant.Name }
+            },
+            user.Id,
+            null,
+            null,
+            null,
+            cancellationToken);
+
+        // Generate email verification token
+        var emailVerificationToken = GenerateEmailVerificationToken(user.Id);
+
+        // Send verification email (Phase 4 implementation)
+        await _emailService.SendEmailVerificationAsync(
+            user.Email,
+            emailVerificationToken,
+            $"{user.FirstName} {user.LastName}",
+            cancellationToken);
+
+        return new RegisterResponse
+        {
+            UserId = user.Id,
+            TenantId = tenant.Id,
+            Email = user.Email,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            OrganizationName = tenant.Name,
+            Role = tenantUser.Role.ToString(),
+            EmailConfirmed = user.EmailConfirmed,
+            EmailVerificationToken = emailVerificationToken
+        };
     }
 
     /// <summary>
