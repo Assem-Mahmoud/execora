@@ -12,8 +12,9 @@ public class PasswordHasher : IPasswordHasher
     private const int MaxPasswordLength = 128;
 
     // At least one uppercase, one lowercase, one digit, one special character
+    // Includes commonly used special characters: @ $ ! % * ? & # ^ ~ - _ + = .
     private static readonly Regex PasswordRegex = new(
-        @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$",
+        @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^~\-_=.])[A-Za-z\d@$!%*?&#^~\-_=.]{12,}$",
         RegexOptions.Compiled
     );
 

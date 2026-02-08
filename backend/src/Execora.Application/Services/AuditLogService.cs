@@ -1,5 +1,7 @@
+using Execora.Core.Enums;
 using System.Diagnostics;
 using System.Text.Json;
+using Execora.Core.Entities;
 using Execora.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -21,10 +23,9 @@ public class AuditLogService : IAuditLogService
         _context = context;
     }
 
-    public Task LogAsync(AuditLogEntry entry, CancellationToken cancellationToken = default)
+    public async Task LogAsync(AuditLogEntry entry, CancellationToken cancellationToken = default)
     {
-        // Log to structured logging for now
-        // In production, this would write to the AuditLog table
+        // Log to structured logging
         _logger.LogInformation(
             "Audit: {Action} {EntityName}/{EntityId} by {ChangedBy} (Tenant: {TenantId})",
             entry.Action,
@@ -33,24 +34,39 @@ public class AuditLogService : IAuditLogService
             entry.ChangedBy,
             entry.TenantId);
 
-        // TODO: Implement persistent audit log storage when AuditLog entity is created
-        // Example:
-        // if (_context != null)
-        // {
-        //     var auditLog = new AuditLog
-        //     {
-        //         Id = Guid.NewGuid(),
-        //         TenantId = entry.TenantId,
-        //         EntityName = entry.EntityName,
-        //         EntityId = entry.EntityId,
-        //         Action = entry.Action,
-        //         // ... map other properties
-        //     };
-        //     _context.AuditLogs.Add(auditLog);
-        //     await _context.SaveChangesAsync(cancellationToken);
-        // }
+        // Implement persistent audit log storage
+        if (_context != null)
+        {
+            try
+            {
+                var auditLog = new AuditLog
+                {
+                    Id = Guid.NewGuid(),
+                    TenantId = entry.TenantId,
+                    EntityName = entry.EntityName,
+                    EntityId = entry.EntityId,
+                    Action = (Execora.Core.Enums.AuditAction)entry.Action,
+                    ActionType = entry.ActionType,
+                    OldValues = entry.OldValues,
+                    NewValues = entry.NewValues,
+                    ChangedBy = entry.ChangedBy,
+                    ChangedByType = "API", // Default to API for now, can be enhanced later
+                    IpAddress = entry.IpAddress,
+                    UserAgent = entry.UserAgent,
+                    ProjectId = entry.ProjectId,
+                    ChangedAt = DateTime.UtcNow
+                };
 
-        return Task.CompletedTask;
+                _context.AuditLogs.Add(auditLog);
+                await _context.SaveChangesAsync(cancellationToken);
+                _logger.LogDebug("Audit log persisted to database for {Action} {EntityName}/{EntityId}", entry.Action, entry.EntityName, entry.EntityId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to persist audit log to database. Falling back to structured logging.");
+                // Continue with structured logging as fallback
+            }
+        }
     }
 
     public Task LogCreateAsync(

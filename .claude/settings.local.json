@@ -14,7 +14,17 @@
       "Bash(npx:*)",
       "Bash(npm install:*)",
       "Bash(npm run build:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(gh pr create:*)",
+      "Bash(coderabbit:*)",
+      "Bash(coderabbit auth status:*)",
+      "Bash(gh api:*)",
+      "Bash(gh pr comment:*)",
+      "Bash(git fetch:*)",
+      "Bash(gh repo view:*)",
+      "Bash(git remote get-url:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr view:*)"
     ]
   }
 }

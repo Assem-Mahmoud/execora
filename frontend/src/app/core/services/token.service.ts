@@ -142,14 +142,27 @@ export class TokenService {
    * Parse JWT token to extract payload
    */
   private parseJwt(token: string): any {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    return JSON.parse(jsonPayload);
+    if (!token || !token.includes('.')) {
+      throw new Error('Invalid token format');
+    }
+
+    const parts = token.split('.');
+    if (parts.length < 3) {
+      throw new Error('Invalid token format');
+    }
+
+    try {
+      const base64Url = parts[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      throw new Error('Invalid token payload');
+    }
   }
 }

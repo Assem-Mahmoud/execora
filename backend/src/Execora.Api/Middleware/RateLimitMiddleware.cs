@@ -64,7 +64,7 @@ public class RateLimitMiddleware
                     identifier, path, counter.Requests.Count, limit.MaxRequests);
 
                 context.Response.StatusCode = (int)HttpStatusCode.TooManyRequests;
-                context.Response.Headers.Add("Retry-After", Math.Ceiling((double)limit.WindowMinutes).ToString());
+                context.Response.Headers["Retry-After"] = Math.Ceiling((double)limit.WindowMinutes).ToString();
                 return;
             }
 

@@ -7,6 +7,9 @@ namespace Execora.Infrastructure.Services.Email;
 
 /// <summary>
 /// SMTP-based email service implementation
+///
+/// Note: SmtpClient is deprecated by Microsoft. Consider migrating to MailKit
+/// for better security and future compatibility in new projects.
 /// </summary>
 public class SmtpEmailService : IEmailService
 {
