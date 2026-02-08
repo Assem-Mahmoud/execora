@@ -3,21 +3,6 @@ using Execora.Core.Enums;
 namespace Execora.Application.Services;
 
 /// <summary>
-/// Audit log types for tracking different kinds of changes
-/// </summary>
-public enum AuditAction
-{
-    Created,
-    Updated,
-    Deleted,
-    StateChanged,
-    Viewed,
-    Login,
-    Logout,
-    Exported
-}
-
-/// <summary>
 /// Audit log entry
 /// </summary>
 public record AuditLogEntry
@@ -25,7 +10,7 @@ public record AuditLogEntry
     public Guid? TenantId { get; init; }
     public string EntityName { get; init; } = string.Empty;
     public Guid? EntityId { get; init; }
-    public AuditAction Action { get; init; }
+    public Execora.Core.Enums.AuditAction Action { get; init; }
     public string? ActionType { get; init; }
     public string? OldValues { get; init; }
     public string? NewValues { get; init; }

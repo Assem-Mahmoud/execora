@@ -1,0 +1,147 @@
+<div class="register-container">
+  <div class="register-card">
+    <div class="register-header">
+      <h1>Create Your Account</h1>
+      <p>Join us and start organizing your projects</p>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+      <!-- Email Field -->
+      <div class="form-field">
+        <label class="form-label" for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          class="form-input"
+          placeholder="Enter your email address"
+          [class.is-error]="f.email.invalid && (f.email.dirty || f.email.touched)"
+        />
+        <div class="form-hint" *ngIf="f.email.invalid && (f.email.dirty || f.email.touched)">
+          <div *ngIf="f.email.errors?.required">Email is required</div>
+          <div *ngIf="f.email.errors?.email">Email format is invalid</div>
+        </div>
+      </div>
+
+      <!-- Password Field -->
+      <div class="form-field">
+        <label class="form-label" for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          formControlName="password"
+          class="form-input"
+          placeholder="Create a strong password"
+          (input)="onPasswordChange($event.target.value)"
+          [class.is-error]="f.password.invalid && (f.password.dirty || f.password.touched)"
+        />
+        <app-password-strength [password]="f.password.value" [strengthColor]="getPasswordStrengthColor()" [strengthText]="getPasswordStrengthText()"></app-password-strength>
+        <div class="form-hint password-requirements">
+          <div [class.met]="passwordRequirements.length">
+            <span class="checkmark" *ngIf="passwordRequirements.length">✓</span>
+            <span *ngIf="!passwordRequirements.length">•</span>
+            At least 12 characters
+          </div>
+          <div [class.met]="passwordRequirements.uppercase">
+            <span class="checkmark" *ngIf="passwordRequirements.uppercase">✓</span>
+            <span *ngIf="!passwordRequirements.uppercase">•</span>
+            One uppercase letter
+          </div>
+          <div [class.met]="passwordRequirements.lowercase">
+            <span class="checkmark" *ngIf="passwordRequirements.lowercase">✓</span>
+            <span *ngIf="!passwordRequirements.lowercase">•</span>
+            One lowercase letter
+          </div>
+          <div [class.met]="passwordRequirements.number">
+            <span class="checkmark" *ngIf="passwordRequirements.number">✓</span>
+            <span *ngIf="!passwordRequirements.number">•</span>
+            One number
+          </div>
+          <div [class.met]="passwordRequirements.special">
+            <span class="checkmark" *ngIf="passwordRequirements.special">✓</span>
+            <span *ngIf="!passwordRequirements.special">•</span>
+            One special character
+          </div>
+        </div>
+        <div class="form-hint" *ngIf="f.password.invalid && (f.password.dirty || f.password.touched)">
+          <div *ngIf="f.password.errors?.required">Password is required</div>
+          <div *ngIf="f.password.errors?.minlength">Password must be at least 12 characters long</div>
+        </div>
+      </div>
+
+      <!-- First Name Field -->
+      <div class="form-field">
+        <label class="form-label" for="firstName">First Name</label>
+        <input
+          type="text"
+          id="firstName"
+          formControlName="firstName"
+          class="form-input"
+          placeholder="Enter your first name"
+          [class.is-error]="f.firstName.invalid && (f.firstName.dirty || f.firstName.touched)"
+        />
+        <div class="form-hint" *ngIf="f.firstName.invalid && (f.firstName.dirty || f.firstName.touched)">
+          <div *ngIf="f.firstName.errors?.required">First name is required</div>
+          <div *ngIf="f.firstName.errors?.maxlength">First name must be less than 100 characters</div>
+        </div>
+      </div>
+
+      <!-- Last Name Field -->
+      <div class="form-field">
+        <label class="form-label" for="lastName">Last Name</label>
+        <input
+          type="text"
+          id="lastName"
+          formControlName="lastName"
+          class="form-input"
+          placeholder="Enter your last name"
+          [class.is-error]="f.lastName.invalid && (f.lastName.dirty || f.lastName.touched)"
+        />
+        <div class="form-hint" *ngIf="f.lastName.invalid && (f.lastName.dirty || f.lastName.touched)">
+          <div *ngIf="f.lastName.errors?.required">Last name is required</div>
+          <div *ngIf="f.lastName.errors?.maxlength">Last name must be less than 100 characters</div>
+        </div>
+      </div>
+
+      <!-- Organization Name Field -->
+      <div class="form-field">
+        <label class="form-label" for="organizationName">Organization Name</label>
+        <input
+          type="text"
+          id="organizationName"
+          formControlName="organizationName"
+          class="form-input"
+          placeholder="Enter your organization name"
+          [class.is-error]="f.organizationName.invalid && (f.organizationName.dirty || f.organizationName.touched)"
+        />
+        <div class="organization-slug">
+          Your URL will be: <strong>https://app.execora.com/{{organizationSlug}}</strong>
+        </div>
+        <div class="form-hint" *ngIf="f.organizationName.invalid && (f.organizationName.dirty || f.organizationName.touched)">
+          <div *ngIf="f.organizationName.errors?.required">Organization name is required</div>
+          <div *ngIf="f.organizationName.errors?.minlength">Organization name must be at least 3 characters long</div>
+          <div *ngIf="f.organizationName.errors?.maxlength">Organization name must be less than 100 characters</div>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="submit-btn" [disabled]="loading || registerForm.invalid">
+        <span *ngIf="loading" class="spinner">
+          <nz-icon nzType="loading" nzSpin></nz-icon>
+        </span>
+        <span *ngIf="!loading">Create Account</span>
+        <span *ngIf="loading">Registering...</span>
+      </button>
+
+      <!-- Login Link -->
+      <div class="login-link">
+        <span>Already have an account?</span>
+        <a href="#" (click)="goToLogin()">Login</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="register-footer">
+    <p>© 2026 Execora. All rights reserved.</p>
+  </div>
+</div>

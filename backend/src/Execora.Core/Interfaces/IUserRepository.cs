@@ -26,4 +26,14 @@ public interface IUserRepository : IRepository<User>
     /// Checks if email is already in use
     /// </summary>
     Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Adds a tenant-user relationship
+    /// </summary>
+    Task AddTenantUserAsync(TenantUser tenantUser, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates a user entity
+    /// </summary>
+    Task UpdateAsync(User user, CancellationToken cancellationToken = default);
 }
