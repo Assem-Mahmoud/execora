@@ -1,5 +1,6 @@
 using Execora.Application.DTOs;
 using Execora.Application.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

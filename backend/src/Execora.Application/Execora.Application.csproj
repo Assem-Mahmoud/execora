@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Execora.Auth\Execora.Auth.csproj" />
     <ProjectReference Include="..\Execora.Core\Execora.Core.csproj" />
     <ProjectReference Include="..\Execora.Infrastructure\Execora.Infrastructure.csproj" />
   </ItemGroup>

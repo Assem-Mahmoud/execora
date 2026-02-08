@@ -1,7 +1,11 @@
+using Execora.Application.DTOs;
 using Execora.Application.Services;
+using Execora.Auth.Services;
 using Execora.Core.Entities;
 using Execora.Core.Enums;
 using Execora.Core.Interfaces;
+using Execora.Infrastructure.Data;
+using Execora.Infrastructure.Services.Email;
 using FluentValidation;
 using FluentValidation.Results;
 using Moq;
@@ -30,13 +34,17 @@ public class RegistrationServiceTests
         _mockEmailService = new Mock<IEmailService>();
         _mockValidator = new Mock<IValidator<RegisterRequest>>();
 
+        // Create a test double that implements the essential functionality
+        var testDbContext = new TestDbContext();
+
         _registrationService = new RegistrationService(
             _mockUserRepository.Object,
             _mockTenantRepository.Object,
             _mockAuditLogService.Object,
             _mockPasswordHasher.Object,
             _mockEmailService.Object,
-            _mockValidator.Object
+            _mockValidator.Object,
+            testDbContext
         );
     }
 
@@ -88,6 +96,12 @@ public class RegistrationServiceTests
         _mockTenantRepository.Setup(r => r.AddAsync(It.IsAny<Tenant>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(tenant);
 
+        _mockUserRepository.Setup(r => r.AddTenantUserAsync(It.IsAny<TenantUser>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        _mockUserRepository.Setup(r => r.UpdateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
         // Act
         var result = await _registrationService.RegisterAsync(request);
 
@@ -95,7 +109,7 @@ public class RegistrationServiceTests
         Assert.NotNull(result);
         Assert.Equal(user.Id, result.UserId);
         Assert.Equal(tenant.Id, result.TenantId);
-        Assert.Equal(TenantRole.TenantAdmin, result.Role);
+        Assert.Equal("TenantAdmin", result.Role);
 
         _mockUserRepository.Verify(r => r.AddAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()), Times.Once);
         _mockTenantRepository.Verify(r => r.AddAsync(It.IsAny<Tenant>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -235,6 +249,12 @@ public class RegistrationServiceTests
         _mockTenantRepository.Setup(r => r.AddAsync(It.IsAny<Tenant>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(tenant);
 
+        _mockUserRepository.Setup(r => r.AddTenantUserAsync(It.IsAny<TenantUser>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        _mockUserRepository.Setup(r => r.UpdateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
         // Act
         await _registrationService.RegisterAsync(request);
 
@@ -299,15 +319,31 @@ public class RegistrationServiceTests
         _mockTenantRepository.Setup(r => r.AddAsync(It.IsAny<Tenant>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(tenant);
 
+        _mockUserRepository.Setup(r => r.AddTenantUserAsync(It.IsAny<TenantUser>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        _mockUserRepository.Setup(r => r.UpdateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
         // Act
         await _registrationService.RegisterAsync(request);
 
         // Assert
-        _mockEmailService.Verify(e => e.SendVerificationEmail(
-            user.Id,
+        _mockEmailService.Verify(e => e.SendEmailVerificationAsync(
             user.Email,
             It.IsAny<string>(),
-            null,
+            $"{user.FirstName} {user.LastName}",
             It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    /// <summary>
+    /// Minimal DbContext implementation for testing that doesn't require complex setup
+    /// </summary>
+    private class TestDbContext : ExecoraDbContext
+    {
+        public TestDbContext() : base(new Microsoft.EntityFrameworkCore.DbContextOptions<ExecoraDbContext>())
+        {
+            // This is a minimal implementation that bypasses the complex IdentityDbContext inheritance
+        }
     }
 }

@@ -41,4 +41,15 @@ public class UserRepository : Repository<User>, IUserRepository
         return await _dbSet
             .AnyAsync(u => u.Email == email, cancellationToken);
     }
+
+    public async Task AddTenantUserAsync(TenantUser tenantUser, CancellationToken cancellationToken = default)
+    {
+        await _context.TenantUsers.AddAsync(tenantUser, cancellationToken);
+    }
+
+    public async Task UpdateAsync(User user, CancellationToken cancellationToken = default)
+    {
+        _dbSet.Update(user);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 }
