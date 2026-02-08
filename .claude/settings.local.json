@@ -24,7 +24,8 @@
       "Bash(gh repo view:*)",
       "Bash(git remote get-url:*)",
       "Bash(gh pr list:*)",
-      "Bash(gh pr view:*)"
+      "Bash(gh pr view:*)",
+      "Bash(git show:*)"
     ]
   }
 }
