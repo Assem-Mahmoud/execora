@@ -26,4 +26,19 @@ public interface IPasswordHasher
     /// <param name="password">Password to validate</param>
     /// <returns>True if password meets requirements</returns>
     bool ValidatePasswordStrength(string password);
+
+    /// <summary>
+    /// Checks if a password hash exists in the user's password history
+    /// </summary>
+    /// <param name="passwordHash">Password hash to check</param>
+    /// <param name="historyPasswords">List of password hashes from history</param>
+    /// <returns>True if password is found in history</returns>
+    bool IsPasswordInHistory(string passwordHash, IEnumerable<string> historyPasswords);
+
+    /// <summary>
+    /// Adds a password hash to the user's password history
+    /// </summary>
+    /// <param name="passwordHash">Password hash to add to history</param>
+    /// <returns>The password hash to store in history</returns>
+    string AddToPasswordHistory(string passwordHash);
 }

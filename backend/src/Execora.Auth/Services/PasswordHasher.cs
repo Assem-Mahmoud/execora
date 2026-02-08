@@ -68,4 +68,32 @@ public class PasswordHasher : IPasswordHasher
 
         return PasswordRegex.IsMatch(password);
     }
+
+    /// <summary>
+    /// Checks if a password hash exists in the user's password history
+    /// </summary>
+    public bool IsPasswordInHistory(string passwordHash, IEnumerable<string> historyPasswords)
+    {
+        if (string.IsNullOrWhiteSpace(passwordHash) || historyPasswords == null)
+        {
+            return false;
+        }
+
+        return historyPasswords.Contains(passwordHash);
+    }
+
+    /// <summary>
+    /// Adds a password hash to the user's password history
+    /// </summary>
+    public string AddToPasswordHistory(string passwordHash)
+    {
+        if (string.IsNullOrWhiteSpace(passwordHash))
+        {
+            throw new ArgumentException("Password hash cannot be empty.", nameof(passwordHash));
+        }
+
+        // In a real implementation, you might want to hash the password again for history
+        // to prevent rainbow table attacks, but we'll use the same hash for simplicity
+        return passwordHash;
+    }
 }

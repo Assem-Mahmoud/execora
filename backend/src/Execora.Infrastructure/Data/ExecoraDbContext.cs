@@ -19,7 +19,8 @@ public class ExecoraDbContext : IdentityDbContext<IdentityUser>
     #region Multi-Tenancy Core
 
     public DbSet<Tenant> Tenants { get; set; } = null!;
-    public DbSet<User> Users { get; set; } = null!;
+    public override DbSet<IdentityUser> Users { get; set; } = null!;
+    public DbSet<User> AppUsers { get; set; } = null!;
     public DbSet<TenantUser> TenantUsers { get; set; } = null!;
     public DbSet<Organization> Organizations { get; set; } = null!;
 
@@ -31,6 +32,7 @@ public class ExecoraDbContext : IdentityDbContext<IdentityUser>
     public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
     public DbSet<AuditLog> AuditLogs { get; set; } = null!;
     public DbSet<PasswordHistory> PasswordHistory { get; set; } = null!;
+    public DbSet<PasswordResetToken> PasswordResetTokens { get; set; } = null!;
 
     #endregion
 
@@ -184,6 +186,13 @@ public class ExecoraDbContext : IdentityDbContext<IdentityUser>
             .HasForeignKey(rt => rt.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // PasswordResetToken - User (Many-to-One)
+        builder.Entity<PasswordResetToken>()
+            .HasOne(prt => prt.User)
+            .WithMany()
+            .HasForeignKey(prt => prt.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         // Unique constraint on TenantUser combination
         builder.Entity<TenantUser>()
             .HasIndex(tu => new { tu.TenantId, tu.UserId })
@@ -249,6 +258,24 @@ public class ExecoraDbContext : IdentityDbContext<IdentityUser>
         builder.Entity<RefreshToken>()
             .HasIndex(rt => rt.ExpiresAt)
             .HasDatabaseName("IX_RefreshTokens_ExpiresAt");
+
+        // PasswordResetToken indexes
+        builder.Entity<PasswordResetToken>()
+            .HasIndex(prt => prt.Token)
+            .IsUnique()
+            .HasDatabaseName("IX_PasswordResetTokens_Token");
+
+        builder.Entity<PasswordResetToken>()
+            .HasIndex(prt => prt.UserId)
+            .HasDatabaseName("IX_PasswordResetTokens_UserId");
+
+        builder.Entity<PasswordResetToken>()
+            .HasIndex(prt => prt.ExpiresAt)
+            .HasDatabaseName("IX_PasswordResetTokens_ExpiresAt");
+
+        builder.Entity<PasswordResetToken>()
+            .HasIndex(prt => prt.IsUsed)
+            .HasDatabaseName("IX_PasswordResetTokens_IsUsed");
 
         // AuditLog indexes
         builder.Entity<AuditLog>()
