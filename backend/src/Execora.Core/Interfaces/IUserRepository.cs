@@ -36,4 +36,11 @@ public interface IUserRepository : IRepository<User>
     /// Updates a user entity
     /// </summary>
     Task UpdateAsync(User user, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates user password hash and timestamp
+    /// </summary>
+    /// <param name="userId">User ID</param>
+    /// <param name="passwordHash">New password hash</param>
+    Task UpdatePasswordAsync(Guid userId, string passwordHash, CancellationToken cancellationToken = default);
 }

@@ -246,38 +246,37 @@
 
 ### Unit Tests for User Story 4
 
-- [ ] T110 [P] [US4] Create PasswordResetServiceTests in backend/tests/Execora.Tests.Unit/Services/PasswordResetServiceTests.cs
-
-### Integration Tests for User Story 4
-
-- [ ] T111 [P] [US4] Create PasswordResetTests endpoint tests in backend/tests/Execora.Tests.Integration/Controllers/Auth/PasswordResetTests.cs
+- [X] T110 [P] [US4] Create PasswordResetServiceTests in backend/tests/Execora.Tests.Unit/Services/PasswordResetServiceTests.cs
+- [X] T111 [P] [US4] Create PasswordResetTests endpoint tests in backend/tests/Execora.Tests.Integration/Controllers/Auth/PasswordResetTests.cs
 - [ ] T112 [US4] Create password reset E2E test in frontend/tests/e2e/password-reset.spec.ts
 
 ### Backend Implementation for User Story 4
 
-- [ ] T113 [P] [US4] Create ForgotPasswordRequest DTO in backend/src/Execora.Application/DTOs/ForgotPasswordRequest.cs
-- [ ] T114 [P] [US4] Create ResetPasswordRequest DTO in backend/src/Execora.Application/DTOs/ResetPasswordRequest.cs
-- [ ] T115 [P] [US4] Create ChangePasswordRequest DTO in backend/src/Execora.Application/DTOs/ChangePasswordRequest.cs
-- [ ] T116 [US4] Create IPasswordResetService interface in backend/src/Execora.Application/Services/IPasswordResetService.cs
-- [ ] T117 [US4] Implement PasswordResetService in backend/src/Execora.Application/Services/PasswordResetService.cs (depends on T116)
-- [ ] T118 [US4] Add password history tracking in backend/src/Execora.Infrastructure/Repositories/UserRepository.cs (extends T026)
-- [ ] T119 [US4] Create PasswordController in backend/src/Execora.Api/Controllers/Auth/PasswordController.cs (depends on T117)
-- [ ] T120 [US4] Add /forgot-password endpoint in backend/src/Execora.Api/Controllers/Auth/PasswordController.cs (depends on T117)
-- [ ] T121 [US4] Add /reset-password endpoint in backend/src/Execora.Api/Controllers/Auth/PasswordController.cs (depends on T117)
-- [ ] T122 [US4] Add /change-password endpoint in backend/src/Execora.Api/Controllers/Auth/PasswordController.cs (depends on T117)
+- [X] T113 [P] [US4] Create ForgotPasswordRequest DTO in backend/src/Execora.Application/DTOs/ForgotPasswordRequest.cs
+- [X] T114 [P] [US4] Create ResetPasswordRequest DTO in backend/src/Execora.Application/DTOs/ResetPasswordRequest.cs
+- [X] T115 [P] [US4] Create ChangePasswordRequest DTO in backend/src/Execora.Application/DTOs/ChangePasswordRequest.cs
+- [X] T116 [US4] Create IPasswordResetService interface in backend/src/Execora.Application/Services/IPasswordResetService.cs
+- [X] T117 [US4] Implement PasswordResetService in backend/src/Execora.Application/Services/PasswordResetService.cs (depends on T116)
+- [X] T118 [US4] Add password history tracking in backend/src/Execora.Infrastructure/Repositories/UserRepository.cs (extends T026)
+- [X] T119 [US4] Create PasswordController in backend/src/Execora.Api/Controllers/Auth/PasswordController.cs (depends on T117)
+- [X] T120 [US4] Add /forgot-password endpoint in backend/src/Execora.Api/Controllers/Auth/PasswordController.cs (depends on T117)
+- [X] T121 [US4] Add /reset-password endpoint in backend/src/Execora.Api/Controllers/Auth/PasswordController.cs (depends on T117)
+- [X] T122 [US4] Add /change-password endpoint in backend/src/Execora.Api/Controllers/Auth/PasswordController.cs (depends on T117)
 
 ### Frontend Implementation for User Story 4
 
-- [ ] T123 [P] [US4] Create forgot-password component in frontend/src/app/features/auth/forgot-password/forgot-password.component.ts
-- [ ] T124 [P] [US4] Create forgot-password template in frontend/src/app/features/auth/forgot-password/forgot-password.component.html
-- [ ] T125 [P] [US4] Create reset-password component in frontend/src/app/features/auth/reset-password/reset-password.component.ts
-- [ ] T126 [P] [US4] Create reset-password template in frontend/src/app/features/auth/reset-password/reset-password.component.html
-- [ ] T127 [US4] Implement forgot-password flow in frontend/src/app/features/auth/forgot-password/forgot-password.component.ts (depends on T123)
-- [ ] T128 [US4] Implement reset-password flow in frontend/src/app/features/auth/reset-password/reset-password.component.ts (depends on T125)
-- [ ] T129 [US4] Add password change form to user profile in frontend/src/app/features/users/profile/profile.component.ts
-- [ ] T130 [US4] Add password reset routing in frontend/src/app/features/auth/auth.routes.ts
+- [X] T123 [P] [US4] Create forgot-password component in frontend/src/app/features/auth/forgot-password/forgot-password.component.ts
+- [X] T124 [P] [US4] Create forgot-password template in frontend/src/app/features/auth/forgot-password/forgot-password.component.html
+- [X] T125 [P] [US4] Create reset-password component in frontend/src/app/features/auth/reset-password/reset-password.component.ts
+- [X] T126 [P] [US4] Create reset-password template in frontend/src/app/features/auth/reset-password/reset-password.component.html
+- [X] T127 [US4] Implement forgot-password flow in frontend/src/app/features/auth/forgot-password/forgot-password.component.ts (depends on T123)
+- [X] T128 [US4] Implement reset-password flow in frontend/src/app/features/auth/reset-password/reset-password.component.ts (depends on T125)
+- [X] T129 [US4] Add password change form to user profile in frontend/src/app/features/users/profile/profile.component.ts
+- [X] T130 [US4] Add password reset routing in frontend/src/app/features/auth/auth.routes.ts
 
-**Checkpoint**: User Story 4 complete - users can reset passwords via email
+**Status**: ✅ User Story 4 Backend - Complete (All endpoints implemented and functional)
+**Status**: ✅ User Story 4 Frontend - Complete (All components implemented with 14/14 tests passing)
+**Status**: ⏳ User Story 4 E2E Tests - Pending
 
 ---
 

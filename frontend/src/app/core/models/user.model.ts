@@ -1,3 +1,5 @@
+import { TenantRole, Tenant } from './tenant.model';
+
 /**
  * Represents a user in the system
  */

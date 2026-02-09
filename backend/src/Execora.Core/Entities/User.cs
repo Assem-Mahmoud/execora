@@ -52,6 +52,11 @@ public class User : BaseEntity
     /// </summary>
     public DateTime? LastLoginAt { get; set; }
 
+    /// <summary>
+    /// Last password change timestamp
+    /// </summary>
+    public DateTime? PasswordChangedAt { get; set; }
+
     // Navigation properties
     public ICollection<TenantUser> TenantUsers { get; set; } = new List<TenantUser>();
 }

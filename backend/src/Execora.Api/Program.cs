@@ -184,6 +184,10 @@ public class Program
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         services.AddScoped<IAuditLogService, AuditLogService>();
 
+        // Register Password Reset Services (Phase 7)
+        services.AddScoped<IPasswordResetService, PasswordResetService>();
+        services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
+
         // Register Auth Services (Phase 2)
         services.AddScoped<IPasswordHasher, PasswordHasher>();
 

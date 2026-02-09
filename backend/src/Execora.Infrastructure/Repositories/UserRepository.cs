@@ -1,9 +1,10 @@
 using Execora.Core.Entities;
 using Execora.Core.Interfaces;
 using Execora.Infrastructure.Data;
+using Execora.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
-
-namespace Execora.Infrastructure.Repositories;
+using System.Security.Cryptography;
+using System.Text;
 
 /// <summary>
 /// Repository for User entity operations
@@ -50,6 +51,26 @@ public class UserRepository : Repository<User>, IUserRepository
     public async Task UpdateAsync(User user, CancellationToken cancellationToken = default)
     {
         _dbSet.Update(user);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task UpdatePasswordAsync(Guid userId, string passwordHash, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(passwordHash))
+        {
+            throw new ArgumentException("Password hash cannot be empty.", nameof(passwordHash));
+        }
+
+        var user = await _dbSet.FindAsync(new object[] { userId }, cancellationToken);
+        if (user == null)
+        {
+            throw new KeyNotFoundException($"User with ID {userId} not found");
+        }
+
+        user.PasswordHash = passwordHash;
+        user.PasswordChangedAt = DateTime.UtcNow;
+        user.UpdatedAt = DateTime.UtcNow;
+
         await _context.SaveChangesAsync(cancellationToken);
     }
 }

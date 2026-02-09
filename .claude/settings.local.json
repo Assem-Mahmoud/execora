@@ -25,7 +25,17 @@
       "Bash(git remote get-url:*)",
       "Bash(gh pr list:*)",
       "Bash(gh pr view:*)",
-      "Bash(git show:*)"
+      "Bash(git show:*)",
+      "Bash(./.specify/scripts/powershell/check-prerequisites.ps1:*)",
+      "Bash(xargs -I {} gh api repos/Assem-Mahmoud/execora/issues/comments/{} -X DELETE:*)",
+      "Bash(npm test:*)",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(timeout:*)",
+      "Bash(ng test --no-watch)",
+      "Bash(ng test:*)",
+      "Bash(ng build:*)",
+      "Bash(npm run lint:*)"
     ]
   }
 }

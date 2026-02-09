@@ -56,7 +56,7 @@ export class AuthService {
   private readonly TENANT_KEY = 'execora_tenant';
   private readonly ROLE_KEY = 'execora_role';
 
-  private authState$ = new BehaviorSubject<AuthState>({
+  private _authState$ = new BehaviorSubject<AuthState>({
     isAuthenticated: false,
     user: null,
     currentTenant: null,
@@ -64,7 +64,7 @@ export class AuthService {
     allTenants: []
   });
 
-  authState$ = this.authState$.asObservable();
+  public authState$ = this._authState$.asObservable();
 
   constructor(private apiService: ApiService) {
     this.initializeFromStorage();
@@ -81,42 +81,42 @@ export class AuthService {
    * Get current authenticated user
    */
   get currentUser(): UserProfile | null {
-    return this.authState$.value.user;
+    return this._authState$.value.user;
   }
 
   /**
    * Get current tenant
    */
   get currentTenant(): Tenant | null {
-    return this.authState$.value.currentTenant;
+    return this._authState$.value.currentTenant;
   }
 
   /**
    * Get current role in tenant
    */
   get currentRole(): TenantRole | null {
-    return this.authState$.value.currentRole;
+    return this._authState$.value.currentRole;
   }
 
   /**
    * Check if user is authenticated
    */
   get isAuthenticated(): boolean {
-    return this.authState$.value.isAuthenticated;
+    return this._authState$.value.isAuthenticated;
   }
 
   /**
    * Check if user has specific role
    */
   hasRole(role: TenantRole): boolean {
-    return this.authState$.value.currentRole === role;
+    return this._authState$.value.currentRole === role;
   }
 
   /**
    * Check if user has any of the specified roles
    */
   hasAnyRole(roles: TenantRole[]): boolean {
-    return roles.includes(this.authState$.value.currentRole!);
+    return roles.includes(this._authState$.value.currentRole!);
   }
 
   /**
@@ -141,6 +141,27 @@ export class AuthService {
    */
   register(data: RegisterRequest): Observable<RegisterResponse> {
     return this.apiService.post<RegisterResponse>('/auth/register', data);
+  }
+
+  /**
+   * Request password reset email
+   */
+  forgotPassword(email: { email: string }): Observable<any> {
+    return this.apiService.post('/auth/password/forgot-password', email);
+  }
+
+  /**
+   * Reset password using token
+   */
+  resetPassword(data: { token: string; newPassword: string; confirmPassword: string }): Observable<any> {
+    return this.apiService.post('/auth/password/reset-password', data);
+  }
+
+  /**
+   * Change user password
+   */
+  changePassword(data: { currentPassword: string; newPassword: string; confirmPassword: string }): Observable<any> {
+    return this.apiService.post('/auth/password/change-password', data);
   }
 
   /**
@@ -196,7 +217,7 @@ export class AuthService {
     localStorage.setItem(this.ROLE_KEY, tenantUser.role);
 
     this.updateAuthState({
-      ...this.authState$.value,
+      ...this._authState$.value,
       currentTenant: tenantUser.tenant!,
       currentRole: tenantUser.role
     });
@@ -259,7 +280,7 @@ export class AuthService {
    * Update authentication state
    */
   private updateAuthState(state: AuthState): void {
-    this.authState$.next(state);
+    this._authState$.next(state);
   }
 
   /**
