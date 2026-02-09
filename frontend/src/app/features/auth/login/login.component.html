@@ -1,0 +1,72 @@
+<div class="login-container">
+  <div class="login-box">
+    <div class="login-header">
+      <h1>Welcome Back</h1>
+      <p>Sign in to your account to continue</p>
+    </div>
+
+    <form nz-form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <nz-form-item>
+        <nz-form-control nzErrorTip="Please enter a valid email address">
+          <label nz-form-label>Email</label>
+          <nz-form-control>
+            <input
+              nz-input
+              type="email"
+              formControlName="email"
+              placeholder="Enter your email"
+              (keypress)="onKeyPress($event)"
+            />
+          </nz-form-control>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-control nzErrorTip="Password must be at least 8 characters long">
+          <label nz-form-label>Password</label>
+          <nz-form-control>
+            <input
+              nz-input
+              type="password"
+              formControlName="password"
+              placeholder="Enter your password"
+              (keypress)="onKeyPress($event)"
+            />
+          </nz-form-control>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <div class="form-footer">
+          <label nz-checkbox formControlName="rememberMe">Remember me</label>
+          <a href="javascript:;" (click)="forgotPassword()">Forgot Password?</a>
+        </div>
+      </nz-form-item>
+
+      <nz-form-item>
+        <button
+          nz-button
+          type="submit"
+          [nzLoading]="loading"
+          [nzType]="'primary'"
+          [nzBlock]="true"
+        >
+          Sign In
+        </button>
+      </nz-form-item>
+    </form>
+
+    <div class="login-divider">
+      <span>Don't have an account?</span>
+    </div>
+
+    <button
+      nz-button
+      [nzType]="'default'"
+      [nzBlock]="true"
+      (click)="goToRegister()"
+    >
+      Create Account
+    </button>
+  </div>
+</div>

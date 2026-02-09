@@ -60,8 +60,12 @@ export interface RegisterResponse {
   userId: string;
   tenantId: string;
   email: string;
-  requiresEmailVerification: boolean;
-  message: string;
+  firstName: string;
+  lastName: string;
+  organizationName: string;
+  role: string;
+  emailVerified: boolean;
+  emailVerificationToken?: string;
 }
 
 /**
@@ -115,6 +119,17 @@ export interface VerifyEmailRequest {
  */
 export interface ResendVerificationRequest {
   email: string;
+}
+
+/**
+ * Verify email response
+ */
+export interface VerifyEmailResponse {
+  success: boolean;
+  emailVerified: boolean;
+  email?: string;
+  errorMessage?: string;
+  successMessage?: string;
 }
 
 /**

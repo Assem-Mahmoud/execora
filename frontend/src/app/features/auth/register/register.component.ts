@@ -2,15 +2,16 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { CommonModule } from '@angular/common';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { PasswordStrengthComponent } from '../../../shared/components/password-strength/password-strength.component';
 import { AuthService } from '../../../core/services/auth.service';
-import { RegisterRequest, RegisterResponse } from '../../../core/models';
+import { RegisterRequest, RegisterResponse } from '../../../core/models/auth.model';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [PasswordStrengthComponent],
+  imports: [CommonModule, PasswordStrengthComponent],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss']
 })
@@ -93,7 +94,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     };
 
     // Update password validation rules
-    const passwordControl = this.f.password;
+    const passwordControl = this.f['password'];
     passwordControl.updateValueAndValidity();
   }
 
@@ -121,7 +122,14 @@ export class RegisterComponent implements OnInit, OnDestroy {
     const subscription = this.authService.register(registerData).subscribe({
       next: (response: RegisterResponse) => {
         this.message.success('Registration successful! Please check your email for verification.');
-        this.router.navigate(['/login']);
+
+        // Redirect to verify-email page with email
+        this.router.navigate(['/verify-email'], {
+          queryParams: {
+            email: registerData.email,
+            token: response.emailVerificationToken
+          }
+        });
       },
       error: (error: any) => {
         this.loading = false;
@@ -172,8 +180,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   // Auto-generate organization slug from name (for preview)
   get organizationSlug(): string {
-    if (!this.f.organizationName.value) return '';
-    return this.f.organizationName.value
+    if (!this.f['organizationName'].value) return '';
+    return this.f['organizationName'].value
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '-')
       .replace(/-+/g, '-')

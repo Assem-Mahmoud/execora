@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { map, switchMap, tap, catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { User, UserProfile, Tenant, TenantRole } from '../models';
-import { RegisterRequest, RegisterResponse } from '../models/auth.model';
+import { RegisterRequest, RegisterResponse, VerifyEmailRequest, ResendVerificationRequest, VerifyEmailResponse } from '../models/auth.model';
 
 /**
  * Authentication tokens
@@ -162,6 +162,20 @@ export class AuthService {
    */
   changePassword(data: { currentPassword: string; newPassword: string; confirmPassword: string }): Observable<any> {
     return this.apiService.post('/auth/password/change-password', data);
+  }
+
+  /**
+   * Verify email using token
+   */
+  verifyEmail(token: string): Observable<VerifyEmailResponse> {
+    return this.apiService.post<VerifyEmailResponse>('/auth/verify-email', { token });
+  }
+
+  /**
+   * Resend email verification
+   */
+  resendVerification(email: string): Observable<any> {
+    return this.apiService.post('/auth/resend-verification', { email });
   }
 
   /**

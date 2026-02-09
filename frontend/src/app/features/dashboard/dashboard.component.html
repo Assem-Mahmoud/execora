@@ -1,0 +1,78 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Dashboard</h1>
+    <button nz-button (click)="logout()" nzDanger>Logout</button>
+  </div>
+
+  @if (!isEmailVerified) {
+    <nz-alert
+      nzType="warning"
+      nzBanner
+      nzCloseable
+      nzMessage="Please verify your email address to access all features."
+      nzAction="<button nz-button nzSize='small' (click)='resendVerification()'>Resend Email</button>"
+    >
+    </nz-alert>
+  }
+
+  <div class="dashboard-content">
+    <nz-card>
+      <nz-card-meta
+        [nzAvatar]="user?.firstName?.[0] + (user?.lastName?.[0] || '') || 'U'"
+        [nzTitle]="'Welcome, ' + (user?.firstName + ' ' + user?.lastName || 'User')"
+        [nzDescription]="user?.email"
+      >
+        <div nz-card-meta-title>
+          <span class="user-email">{{ user?.email }}</span>
+          @if (!isEmailVerified) {
+            <nz-tag nzColor="warning">Unverified</nz-tag>
+          } @else {
+            <nz-tag nzColor="success">Verified</nz-tag>
+          }
+        </div>
+      </nz-card-meta>
+    </nz-card>
+
+    <div class="dashboard-grid">
+      <nz-card nzTitle="Quick Actions" [nzExtra]="['']">
+        <div class="quick-actions">
+          <button nz-button nzType="primary">
+            <i nz-icon nzType="plus"></i>
+            New Project
+          </button>
+          <button nz-button nzType="default">
+            <i nz-icon nzType="file"></i>
+            Documents
+          </button>
+          <button nz-button nzType="default">
+            <i nz-icon nzType="team"></i>
+            Team
+          </button>
+          <button nz-button nzType="default">
+            <i nz-icon nzType="setting"></i>
+            Settings
+          </button>
+        </div>
+      </nz-card>
+
+      <nz-card nzTitle="Recent Activity">
+        <p>No recent activity to display.</p>
+      </nz-card>
+
+      <nz-card nzTitle="System Status">
+        <div class="status-item">
+          <span class="status-label">Database:</span>
+          <span class="status-value status-connected">Connected</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">API:</span>
+          <span class="status-value status-connected">Online</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Storage:</span>
+          <span class="status-value status-warning">75% Used</span>
+        </div>
+      </nz-card>
+    </div>
+  </div>
+</div>

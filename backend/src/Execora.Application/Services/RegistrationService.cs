@@ -80,7 +80,7 @@ public class RegistrationService : IRegistrationService
             PasswordHash = passwordHash,
             FirstName = request.FirstName,
             LastName = request.LastName,
-            EmailConfirmed = false // Email verification to be implemented in Phase 4
+            EmailVerified = false // Email verification to be implemented in Phase 4
         };
 
         // Create tenant
@@ -141,7 +141,7 @@ public class RegistrationService : IRegistrationService
 
         // TODO: Implement email verification token validation in Phase 4
         // For now, just mark email as confirmed
-        user.EmailConfirmed = true;
+        user.EmailVerified = true;
         await _userRepository.UpdateAsync(user, cancellationToken);
 
         // Log verification
@@ -166,7 +166,7 @@ public class RegistrationService : IRegistrationService
     public async Task ResendVerificationEmailAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        if (user == null || user.EmailConfirmed)
+        if (user == null || user.EmailVerified)
         {
             return;
         }
@@ -243,7 +243,7 @@ public class RegistrationService : IRegistrationService
             LastName = user.LastName,
             OrganizationName = tenant.Name,
             Role = tenantUser.Role.ToString(),
-            EmailConfirmed = user.EmailConfirmed,
+            EmailVerified = user.EmailVerified,
             EmailVerificationToken = emailVerificationToken
         };
     }
@@ -273,5 +273,29 @@ public class RegistrationService : IRegistrationService
         // TODO: Use proper token generation service in Phase 4
         // For now, generate a simple token
         return Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+    }
+
+    /// <summary>
+    /// Get verification status for a user
+    /// </summary>
+    public async Task<VerificationStatusResponse> GetVerificationStatusAsync(string email, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
+        if (user == null)
+        {
+            return new VerificationStatusResponse
+            {
+                IsVerified = false,
+                Status = "User not found",
+                Email = email
+            };
+        }
+
+        return new VerificationStatusResponse
+        {
+            IsVerified = user.EmailVerified,
+            Email = email,
+            Status = user.EmailVerified ? "Email is already verified" : "Email verification pending"
+        };
     }
 }

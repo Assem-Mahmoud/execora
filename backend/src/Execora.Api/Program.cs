@@ -15,6 +15,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.Text;
+using FluentValidation;
+using Execora.Application.Validators;
 
 namespace Execora.Api;
 
@@ -206,6 +208,13 @@ public class Program
 
         // Register Registration Service (Phase 3)
         services.AddScoped<IRegistrationService, RegistrationService>();
+
+        // Register Email Verification Services (Phase 4)
+        services.AddScoped<IEmailVerificationService, EmailVerificationService>();
+        services.AddScoped<IEmailVerificationTokenRepository, EmailVerificationTokenRepository>();
+
+        // Register Validators
+        services.AddValidatorsFromAssemblyContaining<RegistrationValidator>();
 
         // Health Checks
         services.AddHealthChecks()

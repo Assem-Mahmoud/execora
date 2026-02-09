@@ -43,7 +43,7 @@ public record RegisterResponse
     /// <summary>
     /// Email verification status
     /// </summary>
-    public bool EmailConfirmed { get; init; }
+    public bool EmailVerified { get; init; }
 
     /// <summary>
     /// Email verification token (for client verification)

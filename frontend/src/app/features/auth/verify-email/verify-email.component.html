@@ -1,0 +1,94 @@
+<div class="verify-email-container">
+  <div class="verify-email-card">
+    <div class="verify-email-header">
+      <span nz-icon nzType="mail" nzTheme="outline" class="verify-email-icon"></span>
+      <h2>Email Verification</h2>
+    </div>
+
+    @if (!isSuccess && !isError) {
+      <div class="verify-email-content">
+        <div class="info-text">
+          <p>Verify your email address to complete your registration</p>
+          @if (email) {
+            <p class="email-display">Email: {{ email }}</p>
+          }
+        </div>
+
+        @if (!token) {
+          <div class="token-prompt">
+            <nz-alert
+              nzType="info"
+              nzDescription="Please check your email for the verification link. If you didn't receive the email, you can request it below."
+            >
+            </nz-alert>
+            <div class="resend-section">
+              <input
+                nz-input
+                placeholder="Enter your email address"
+                [(ngModel)]="email"
+                class="email-input"
+              />
+              <button
+                nz-button
+                nzType="primary"
+                (click)="resendVerification()"
+                [nzLoading]="isLoading"
+                class="resend-button"
+              >
+                <span nz-icon nzType="reload"></span>
+                Resend Verification
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (isLoading) {
+      <div class="verify-email-loading">
+        <nz-spin nzSize="large"></nz-spin>
+        <p>Verifying your email...</p>
+      </div>
+    }
+
+    @if (isError) {
+      <div class="verify-email-error">
+        <nz-alert
+          nzType="error"
+          nzTitle="Verification Failed"
+          [nzDescription]="errorMessage"
+        >
+        </nz-alert>
+        <div class="error-actions">
+          <button
+            nz-button
+            nzType="primary"
+            (click)="resendVerification()"
+            [nzLoading]="isLoading"
+          >
+            <span nz-icon nzType="reload"></span>
+            Try Again
+          </button>
+          <button
+            nz-button
+            nzType="default"
+            routerLink="/login"
+          >
+            Back to Login
+          </button>
+        </div>
+      </div>
+    }
+
+    @if (isSuccess) {
+      <div class="verify-email-success">
+        <div class="success-result">
+          <span nz-icon nzType="check-circle" nzTheme="fill" class="success-icon"></span>
+          <h3>Email Verified Successfully!</h3>
+          <p>{{ email ? 'Your email ' + email + ' has been verified.' : 'Your email has been verified.' }}</p>
+          <p>You will be redirected to login page shortly...</p>
+        </div>
+      </div>
+    }
+  </div>
+</div>

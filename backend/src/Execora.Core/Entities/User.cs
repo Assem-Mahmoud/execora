@@ -15,7 +15,17 @@ public class User : BaseEntity
     /// <summary>
     /// Email verification status
     /// </summary>
-    public bool EmailConfirmed { get; set; }
+    public bool EmailVerified { get; set; }
+
+    /// <summary>
+    /// Email verification token (for storing verification tokens)
+    /// </summary>
+    public string? EmailVerificationToken { get; set; }
+
+    /// <summary>
+    /// Email verification token expiration time
+    /// </summary>
+    public DateTime? EmailVerificationTokenExpiresAt { get; set; }
 
     /// <summary>
     /// Mobile number
