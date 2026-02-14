@@ -6,7 +6,7 @@ import { TenantRole, Tenant } from './tenant.model';
 export interface User {
   id: string;
   email: string;
-  emailConfirmed: boolean;
+  emailVerified: boolean;
   phoneNumber?: string | null;
   phoneNumberConfirmed: boolean;
   firstName: string;

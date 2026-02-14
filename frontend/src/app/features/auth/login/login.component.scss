@@ -1,0 +1,126 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+
+  .login-box {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 30px;
+
+      h1 {
+        font-size: 28px;
+        font-weight: 600;
+        color: #1a202c;
+        margin-bottom: 8px;
+      }
+
+      p {
+        color: #718096;
+        font-size: 14px;
+      }
+    }
+
+    form {
+      nz-form-item {
+        margin-bottom: 20px;
+
+        label {
+          font-weight: 500;
+          color: #374151;
+          margin-bottom: 8px;
+          display: block;
+        }
+
+        input {
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
+          padding: 10px 12px;
+          font-size: 14px;
+          width: 100%;
+          transition: all 0.3s;
+
+          &:hover {
+            border-color: #6366f1;
+          }
+
+          &:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+          }
+        }
+      }
+
+      .form-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 14px;
+
+        nz-checkbox {
+          color: #374151;
+        }
+
+        a {
+          color: #6366f1;
+          text-decoration: none;
+          font-weight: 500;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+
+      button {
+        height: 44px;
+        font-weight: 500;
+        font-size: 16px;
+      }
+    }
+
+    .login-divider {
+      text-align: center;
+      margin: 20px 0;
+      position: relative;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #e5e7eb;
+      }
+
+      span {
+        background: white;
+        padding: 0 15px;
+        color: #9ca3af;
+        font-size: 14px;
+        position: relative;
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 480px) {
+  .login-container {
+    .login-box {
+      padding: 30px 20px;
+    }
+  }
+}

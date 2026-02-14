@@ -33,8 +33,7 @@ public class PasswordController : ControllerBase
     [HttpPost("forgot-password")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [RateLimit(5, 15)] // 5 requests per 15 minutes
-    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
     {
         try
         {
@@ -50,12 +49,10 @@ public class PasswordController : ControllerBase
         catch (Exception ex)
         {
             await _auditLogService.LogErrorAsync(
-                AuditAction.Error,
-                "Password",
-                null,
                 $"Forgot password error: {ex.Message}",
                 null,
-                HttpContext.Connection.RemoteIpAddress?.ToString());
+                HttpContext.Connection.RemoteIpAddress?.ToString(),
+                HttpContext.Request.Headers["User-Agent"].ToString());
 
             return BadRequest(new { Error = "An error occurred while processing your request." });
         }
@@ -69,38 +66,33 @@ public class PasswordController : ControllerBase
     [HttpPost("reset-password")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [RateLimit(3, 15)] // 3 attempts per 15 minutes for security
-    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
     {
         try
         {
             // Set IP address and user agent in the request context
             // This will be captured by the service during token validation
-            var token = await _passwordResetService.ResetPasswordAsync(request);
+            await _passwordResetService.ResetPasswordAsync(request);
 
             return Ok(new { Message = "Password has been reset successfully. Please log in with your new password." });
         }
         catch (InvalidOperationException ex)
         {
             await _auditLogService.LogErrorAsync(
-                AuditAction.Error,
-                "Password",
-                null,
                 $"Password reset error: {ex.Message}",
                 null,
-                HttpContext.Connection.RemoteIpAddress?.ToString());
+                HttpContext.Connection.RemoteIpAddress?.ToString(),
+                HttpContext.Request.Headers["User-Agent"].ToString());
 
             return BadRequest(new { Error = ex.Message });
         }
         catch (Exception ex)
         {
             await _auditLogService.LogErrorAsync(
-                AuditAction.Error,
-                "Password",
-                null,
                 $"Password reset error: {ex.Message}",
                 null,
-                HttpContext.Connection.RemoteIpAddress?.ToString());
+                HttpContext.Connection.RemoteIpAddress?.ToString(),
+                HttpContext.Request.Headers["User-Agent"].ToString());
 
             return BadRequest(new { Error = "An error occurred while resetting your password." });
         }
@@ -131,36 +123,30 @@ public class PasswordController : ControllerBase
         catch (UnauthorizedAccessException ex)
         {
             await _auditLogService.LogErrorAsync(
-                AuditAction.SecurityEvent,
-                "Password",
-                null,
                 $"Unauthorized password change attempt: {ex.Message}",
                 null,
-                HttpContext.Connection.RemoteIpAddress?.ToString());
+                HttpContext.Connection.RemoteIpAddress?.ToString(),
+                HttpContext.Request.Headers["User-Agent"].ToString());
 
             return BadRequest(new { Error = ex.Message });
         }
         catch (InvalidOperationException ex)
         {
             await _auditLogService.LogErrorAsync(
-                AuditAction.PasswordChangeFailed,
-                "Password",
-                null,
                 $"Password change validation error: {ex.Message}",
                 null,
-                HttpContext.Connection.RemoteIpAddress?.ToString());
+                HttpContext.Connection.RemoteIpAddress?.ToString(),
+                HttpContext.Request.Headers["User-Agent"].ToString());
 
             return BadRequest(new { Error = ex.Message });
         }
         catch (Exception ex)
         {
             await _auditLogService.LogErrorAsync(
-                AuditAction.Error,
-                "Password",
-                null,
                 $"Password change error: {ex.Message}",
                 null,
-                HttpContext.Connection.RemoteIpAddress?.ToString());
+                HttpContext.Connection.RemoteIpAddress?.ToString(),
+                HttpContext.Request.Headers["User-Agent"].ToString());
 
             return BadRequest(new { Error = "An error occurred while changing your password." });
         }

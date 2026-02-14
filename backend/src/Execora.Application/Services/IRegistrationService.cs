@@ -32,4 +32,12 @@ public interface IRegistrationService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Task representing the operation</returns>
     Task ResendVerificationEmailAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get verification status for a user
+    /// </summary>
+    /// <param name="email">Email address to check</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Verification status response</returns>
+    Task<VerificationStatusResponse> GetVerificationStatusAsync(string email, CancellationToken cancellationToken = default);
 }

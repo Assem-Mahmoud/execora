@@ -15,13 +15,16 @@ namespace Execora.Api.Controllers.Auth;
 public class RegisterController : ControllerBase
 {
     private readonly IRegistrationService _registrationService;
+    private readonly IEmailVerificationService _emailVerificationService;
     private readonly ILogger<RegisterController> _logger;
 
     public RegisterController(
         IRegistrationService registrationService,
+        IEmailVerificationService emailVerificationService,
         ILogger<RegisterController> logger)
     {
         _registrationService = registrationService;
+        _emailVerificationService = emailVerificationService;
         _logger = logger;
     }
 
@@ -78,38 +81,32 @@ public class RegisterController : ControllerBase
     /// <summary>
     /// Verify email address
     /// </summary>
-    /// <param name="userId">User ID</param>
-    /// <param name="token">Verification token</param>
+    /// <param name="request">Verification request containing token</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Success result</returns>
-    [HttpGet("{userId:guid}/verify")]
+    /// <returns>Verification response</returns>
+    [HttpPost("verify-email")]
     public async Task<IActionResult> VerifyEmail(
-        [FromRoute] Guid userId,
-        [FromQuery] string token,
+        [FromBody] VerifyEmailRequest request,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            var success = await _registrationService.VerifyEmailAsync(userId, token, cancellationToken);
+            _logger.LogInformation("Email verification attempt with token");
 
-            if (success)
+            var response = await _emailVerificationService.VerifyEmailAsync(request.Token);
+
+            if (response.Success)
             {
-                return Ok(new
-                {
-                    message = "Email verified successfully"
-                });
+                _logger.LogInformation("Email verified successfully for: {Email}", response.Email);
+                return Ok(response);
             }
 
-            return BadRequest(new
-            {
-                type = "https://example.com/probs/verification-failed",
-                title = "Email verification failed",
-                detail = "Invalid or expired verification token"
-            });
+            _logger.LogWarning("Email verification failed: {ErrorMessage}", response.ErrorMessage);
+            return BadRequest(response);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Email verification failed for user: {UserId}", userId);
+            _logger.LogError(ex, "Unexpected error during email verification");
             return StatusCode(500, new
             {
                 type = "https://example.com/probs/verification-error",
@@ -122,26 +119,33 @@ public class RegisterController : ControllerBase
     /// <summary>
     /// Resend email verification token
     /// </summary>
-    /// <param name="userId">User ID</param>
+    /// <param name="request">Resend verification request containing email</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Success result</returns>
-    [HttpPost("{userId:guid}/resend-verification")]
+    /// <returns>Resend verification response</returns>
+    [HttpPost("resend-verification")]
     public async Task<IActionResult> ResendVerificationEmail(
-        [FromRoute] Guid userId,
+        [FromBody] ResendVerificationRequest request,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            await _registrationService.ResendVerificationEmailAsync(userId, cancellationToken);
+            _logger.LogInformation("Verification email resend attempt for: {Email}", request.Email);
 
-            return Ok(new
+            var response = await _emailVerificationService.ResendVerificationEmailAsync(request.Email);
+
+            if (response.Success)
             {
-                message = "Verification email resent successfully"
-            });
+                _logger.LogInformation("Verification email resent to: {Email}", request.Email);
+                return Ok(response);
+            }
+
+            _logger.LogWarning("Failed to resend verification email to: {Email}. Error: {ErrorMessage}",
+                request.Email, response.ErrorMessage);
+            return BadRequest(response);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to resend verification email for user: {UserId}", userId);
+            _logger.LogError(ex, "Unexpected error resending verification email to: {Email}", request.Email);
             return StatusCode(500, new
             {
                 type = "https://example.com/probs/resend-verification-error",

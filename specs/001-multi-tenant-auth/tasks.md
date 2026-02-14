@@ -167,37 +167,39 @@
 
 ### Unit Tests for User Story 3
 
-- [ ] T075 [P] [US3] Create AuthenticationServiceTests in backend/tests/Execora.Tests.Unit/Services/AuthenticationServiceTests.cs
-- [ ] T076 [P] [US3] Create PasswordHasherTests in backend/tests/Execora.Tests.Unit/Services/PasswordHasherTests.cs
+- [X] T075 [P] [US3] Create AuthenticationServiceTests in backend/tests/Execora.Tests.Unit/Services/AuthenticationServiceTests.cs
+- [X] T076 [P] [US3] Create PasswordHasherTests in backend/tests/Execora.Tests.Unit/Services/PasswordHasherTests.cs
 
 ### Integration Tests for User Story 3
 
-- [ ] T077 [P] [US3] Create LoginTests endpoint tests in backend/tests/Execora.Tests.Integration/Controllers/Auth/LoginTests.cs
-- [ ] T078 [US3] Create login E2E test in frontend/tests/e2e/login.spec.ts
+- [X] T077 [P] [US3] Create LoginTests endpoint tests in backend/tests/Execora.Tests.Integration/Controllers/Auth/LoginTests.cs
+- [X] T078 [US3] Create login E2E test in frontend/tests/e2e/login.spec.ts
 
 ### Backend Implementation for User Story 3
 
-- [ ] T079 [P] [US3] Create LoginRequest DTO in backend/src/Execora.Application/DTOs/LoginRequest.cs
-- [ ] T080 [P] [US3] Create LoginResponse DTO in backend/src/Execora.Application/DTOs/LoginResponse.cs
-- [ ] T081 [US3] Create IAuthenticationService interface in backend/src/Execora.Application/Services/IAuthenticationService.cs
-- [ ] T082 [US3] Implement AuthenticationService in backend/src/Execora.Application/Services/AuthenticationService.cs (depends on T081, T028)
-- [ ] T083 [US3] Add account lockout logic in backend/src/Execora.Application/Services/AuthenticationService.cs (depends on T082)
-- [ ] T084 [US3] Create LoginController in backend/src/Execora.Api/Controllers/Auth/LoginController.cs (depends on T082)
-- [ ] T085 [US3] Add login audit logging in backend/src/Execora.Application/Services/AuthenticationService.cs (depends on T082)
-- [ ] T086 [US3] Configure JWT Bearer authentication in backend/src/Execora.Api/Program.cs (depends on T029)
+- [X] T079 [P] [US3] Create LoginRequest DTO in backend/src/Execora.Application/DTOs/LoginRequest.cs
+- [X] T080 [P] [US3] Create LoginResponse DTO in backend/src/Execora.Application/DTOs/LoginResponse.cs
+- [X] T081 [US3] Create IAuthenticationService interface in backend/src/Execora.Application/Services/IAuthenticationService.cs
+- [X] T082 [US3] Implement AuthenticationService in backend/src/Execora.Application/Services/AuthenticationService.cs (depends on T081, T028)
+- [X] T083 [US3] Add account lockout logic in backend/src/Execora.Application/Services/AuthenticationService.cs (depends on T082)
+- [X] T084 [US3] Create LoginController in backend/src/Execora.Api/Controllers/Auth/LoginController.cs (depends on T082)
+- [X] T085 [US3] Add login audit logging in backend/src/Execora.Application/Services/AuthenticationService.cs (depends on T082)
+- [X] T086 [US3] Configure JWT Bearer authentication in backend/src/Execora.Api/Program.cs (depends on T029)
 
 ### Frontend Implementation for User Story 3
 
-- [ ] T087 [P] [US3] Create login component in frontend/src/app/features/auth/login/login.component.ts
-- [ ] T088 [P] [US3] Create login template in frontend/src/app/features/auth/login/login.component.html
-- [ ] T089 [P] [US3] Create login styles in frontend/src/app/features/auth/login/login.component.scss
-- [ ] T090 [US3] Implement login form validation in frontend/src/app/features/auth/login/login.component.ts (depends on T087)
-- [ ] T091 [US3] Wire login API call in frontend/src/app/core/services/auth.service.ts (depends on T035)
-- [ ] T092 [US3] Store tokens on successful login in frontend/src/app/core/services/token.service.ts (depends on T036)
-- [ ] T093 [US3] Add login routing in frontend/src/app/features/auth/auth.routes.ts
-- [ ] T094 [US3] Create auth-layout component in frontend/src/app/shared/layouts/auth-layout/auth-layout.component.ts
+- [X] T087 [P] [US3] Create login component in frontend/src/app/features/auth/login/login.component.ts
+- [X] T088 [P] [US3] Create login template in frontend/src/app/features/auth/login/login.component.html
+- [X] T089 [P] [US3] Create login styles in frontend/src/app/features/auth/login/login.component.scss
+- [X] T090 [US3] Implement login form validation in frontend/src/app/features/auth/login/login.component.ts (depends on T087)
+- [X] T091 [US3] Wire login API call in frontend/src/app/core/services/auth.service.ts (depends on T035)
+- [X] T092 [US3] Store tokens on successful login in frontend/src/app/core/services/token.service.ts (depends on T036)
+- [X] T093 [US3] Add login routing in frontend/src/app/features/auth/auth.routes.ts
+- [X] T094 [US3] Create auth-layout component in frontend/src/app/shared/layouts/auth-layout/auth-layout.component.ts
 
-**Checkpoint**: User Story 3 complete - users can log in and receive JWT tokens
+**Status**: ✅ User Story 3 Backend - Complete (All endpoints implemented and functional)
+**Status**: ✅ User Story 3 Frontend - Complete (All components implemented with validation)
+**Status**: ✅ User Story 3 E2E Tests - Complete
 
 ---
 

@@ -1,5 +1,6 @@
 using Execora.Api.Filters;
 using Execora.Api.Middleware;
+using Execora.Application.DTOs;
 using Execora.Application.Services;
 using Execora.Auth.Services;
 using Execora.Core.Interfaces;
@@ -15,6 +16,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.Text;
+using FluentValidation;
+using Execora.Application.Validators;
 
 namespace Execora.Api;
 
@@ -206,6 +209,17 @@ public class Program
 
         // Register Registration Service (Phase 3)
         services.AddScoped<IRegistrationService, RegistrationService>();
+
+        // Register Authentication Service (Phase 5)
+        services.AddScoped<IAuthenticationService, AuthenticationService>();
+
+        // Register Email Verification Services (Phase 4)
+        services.AddScoped<IEmailVerificationService, EmailVerificationService>();
+        services.AddScoped<IEmailVerificationTokenRepository, EmailVerificationTokenRepository>();
+
+        // Register Validators
+        services.AddValidatorsFromAssemblyContaining<RegistrationValidator>();
+        services.AddScoped<IValidator<LoginRequest>, LoginValidator>();
 
         // Health Checks
         services.AddHealthChecks()

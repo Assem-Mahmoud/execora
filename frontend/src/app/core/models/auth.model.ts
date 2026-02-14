@@ -23,12 +23,22 @@ export interface LoginRequest {
  * Login response
  */
 export interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-  user: User;
-  tenant: Tenant;
-  availableTenants?: AvailableTenant[];
+  token: string;
+  user: UserResponse;
+}
+
+/**
+ * User response for login
+ */
+export interface UserResponse {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  emailVerified: boolean;
+  role: string;
+  tenantId: string;
+  tenantName?: string;
 }
 
 /**
@@ -60,8 +70,11 @@ export interface RegisterResponse {
   userId: string;
   tenantId: string;
   email: string;
-  requiresEmailVerification: boolean;
-  message: string;
+  firstName: string;
+  lastName: string;
+  organizationName: string;
+  role: string;
+  emailVerified: boolean;
 }
 
 /**
@@ -115,6 +128,17 @@ export interface VerifyEmailRequest {
  */
 export interface ResendVerificationRequest {
   email: string;
+}
+
+/**
+ * Verify email response
+ */
+export interface VerifyEmailResponse {
+  success: boolean;
+  emailVerified: boolean;
+  email?: string;
+  errorMessage?: string;
+  successMessage?: string;
 }
 
 /**

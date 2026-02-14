@@ -6,6 +6,7 @@ using Execora.Infrastructure.Services.Email;
 using Execora.Auth.Services;
 using Microsoft.AspNetCore.Http;
 using System.Security.Cryptography;
+using Execora.Core.Enums;
 
 namespace Execora.Application.Services;
 
@@ -45,7 +46,7 @@ public class PasswordResetService : IPasswordResetService
         // Check if user exists with this email
         var user = await _userRepository.GetByEmailAsync(request.Email);
 
-        if (user == null || !user.IsEmailVerified || !user.IsActive)
+        if (user == null || !user.EmailVerified || !user.IsActive)
         {
             // For security, don't reveal if the email exists
             // Log the attempt but don't send email
@@ -128,16 +129,15 @@ public class PasswordResetService : IPasswordResetService
         // Validate new password requirements
         ValidatePassword(request.NewPassword);
 
+        // Hash new password
+        var newPasswordHash = _passwordHasher.HashPassword(request.NewPassword);
+
         // Check if password is in history (last 5 passwords)
         var passwordHistory = await GetPasswordHistoryAsync(user.Id, 5);
-        var newHash = _passwordHasher.HashPassword(request.NewPassword);
-        if (_passwordHasher.IsPasswordInHistory(newHash, passwordHistory))
+        if (_passwordHasher.IsPasswordInHistory(newPasswordHash, passwordHistory))
         {
             throw new InvalidOperationException("Cannot reuse a previous password");
         }
-
-        // Hash new password
-        var newPasswordHash = _passwordHasher.HashPassword(request.NewPassword);
 
         // Update user password
         await _userRepository.UpdatePasswordAsync(user.Id, newPasswordHash);
@@ -181,7 +181,7 @@ public class PasswordResetService : IPasswordResetService
         }
 
         // Verify current password
-        var isCurrentPasswordValid = await _passwordHasher.VerifyPassword(
+        var isCurrentPasswordValid = _passwordHasher.VerifyPassword(
             request.CurrentPassword,
             user.PasswordHash);
 
@@ -202,14 +202,15 @@ public class PasswordResetService : IPasswordResetService
         // Validate new password requirements
         ValidatePassword(request.NewPassword);
 
+        // Hash new password
+        var newPasswordHash = _passwordHasher.HashPassword(request.NewPassword);
+
         // Check if password is in history (last 5 passwords)
-        if (await _passwordHasher.IsPasswordInHistory(user.Id, request.NewPassword))
+        var passwordHistory = await GetPasswordHistoryAsync(user.Id, 5);
+        if (_passwordHasher.IsPasswordInHistory(newPasswordHash, passwordHistory))
         {
             throw new InvalidOperationException("Cannot reuse a recent password");
         }
-
-        // Hash new password
-        var newPasswordHash = _passwordHasher.HashPassword(request.NewPassword);
 
         // Update user password
         await _userRepository.UpdatePasswordAsync(user.Id, newPasswordHash);

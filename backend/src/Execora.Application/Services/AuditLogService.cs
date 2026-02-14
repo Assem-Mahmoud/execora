@@ -171,4 +171,40 @@ public class AuditLogService : IAuditLogService
             ProjectId = projectId
         }, cancellationToken);
     }
+
+    public Task LogSecurityEventAsync(
+        Execora.Core.Enums.AuditAction action,
+        string entityName,
+        string? entityId,
+        string description,
+        string? ipAddress = null,
+        string? userAgent = null,
+        CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation(
+            "Security Event: {Action} {EntityName}/{EntityId} - {Description}",
+            action,
+            entityName,
+            entityId ?? "null",
+            description);
+
+        return Task.CompletedTask;
+    }
+
+    public Task LogErrorAsync(
+        string errorMessage,
+        string? stackTrace = null,
+        string? ipAddress = null,
+        string? userAgent = null,
+        CancellationToken cancellationToken = default)
+    {
+        _logger.LogError(
+            "Error: {ErrorMessage}\nStackTrace: {StackTrace}\nIP: {IpAddress}\nUserAgent: {UserAgent}",
+            errorMessage,
+            stackTrace ?? "null",
+            ipAddress ?? "null",
+            userAgent ?? "null");
+
+        return Task.CompletedTask;
+    }
 }

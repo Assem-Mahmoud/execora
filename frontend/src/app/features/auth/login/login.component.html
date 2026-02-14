@@ -1,0 +1,46 @@
+<div class="login-container">
+  <div class="login-box">
+    <div class="login-header">
+      <h1>Welcome Back</h1>
+      <p>Sign in to your account to continue</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="fill">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" placeholder="Enter your email">
+        <mat-error *ngIf="f['email']?.errors?.['required']">Please enter a valid email address</mat-error>
+        <mat-error *ngIf="f['email']?.errors?.['email']">Please enter a valid email address</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Password</mat-label>
+        <input matInput type="password" formControlName="password" placeholder="Enter your password">
+        <mat-error *ngIf="f['password']?.errors?.['required']">Password is required</mat-error>
+        <mat-error *ngIf="f['password']?.errors?.['minlength']">Password must be at least 12 characters long</mat-error>
+      </mat-form-field>
+
+      <div class="form-footer">
+        <mat-checkbox formControlName="rememberMe">Remember me</mat-checkbox>
+        <a href="javascript:;" (click)="forgotPassword()">Forgot Password?</a>
+      </div>
+
+      <button mat-raised-button color="primary" type="submit" [disabled]="loading">
+        <span *ngIf="loading">Signing in...</span>
+        <span *ngIf="!loading">Sign In</span>
+      </button>
+    </form>
+
+    <div class="login-divider">
+      <span>Don't have an account?</span>
+    </div>
+
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="goToRegister()"
+    >
+      Create Account
+    </button>
+  </div>
+</div>

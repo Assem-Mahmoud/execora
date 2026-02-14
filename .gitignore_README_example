@@ -1,0 +1,28 @@
+# Copy this file to .gitignore_README and customize it as needed
+
+# Add files that should be ignored for this specific project but might be committed to other projects
+
+# Environment specific files
+/.env.local
+/.env.production.local
+/.env.staging.local
+
+# Local development files
+/.local/
+/localdev/
+
+# Database specific
+/*.local.db
+/local_*.db
+
+# Temporary files
+/tmp_*/
+/temp_*/
+
+# Local backups
+/backup_*/
+/local_backup/
+
+# Feature branches that shouldn't be tracked
+/feature-*/
+/bugfix-*/

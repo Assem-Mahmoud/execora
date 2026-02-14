@@ -33,6 +33,7 @@ public class ExecoraDbContext : IdentityDbContext<IdentityUser>
     public DbSet<AuditLog> AuditLogs { get; set; } = null!;
     public DbSet<PasswordHistory> PasswordHistory { get; set; } = null!;
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; } = null!;
+    public DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; } = null!;
 
     #endregion
 
@@ -193,6 +194,20 @@ public class ExecoraDbContext : IdentityDbContext<IdentityUser>
             .HasForeignKey(prt => prt.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // EmailVerificationToken - User (Many-to-One, optional)
+        builder.Entity<EmailVerificationToken>()
+            .HasOne(evt => evt.User)
+            .WithMany()
+            .HasForeignKey(evt => evt.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // EmailVerificationToken - Tenant (Many-to-One, optional)
+        builder.Entity<EmailVerificationToken>()
+            .HasOne(evt => evt.Tenant)
+            .WithMany()
+            .HasForeignKey(evt => evt.TenantId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         // Unique constraint on TenantUser combination
         builder.Entity<TenantUser>()
             .HasIndex(tu => new { tu.TenantId, tu.UserId })
@@ -276,6 +291,28 @@ public class ExecoraDbContext : IdentityDbContext<IdentityUser>
         builder.Entity<PasswordResetToken>()
             .HasIndex(prt => prt.IsUsed)
             .HasDatabaseName("IX_PasswordResetTokens_IsUsed");
+
+        // EmailVerificationToken indexes
+        builder.Entity<EmailVerificationToken>()
+            .HasIndex(evt => evt.Token)
+            .IsUnique()
+            .HasDatabaseName("IX_EmailVerificationTokens_Token");
+
+        builder.Entity<EmailVerificationToken>()
+            .HasIndex(evt => evt.Email)
+            .HasDatabaseName("IX_EmailVerificationTokens_Email");
+
+        builder.Entity<EmailVerificationToken>()
+            .HasIndex(evt => evt.UserId)
+            .HasDatabaseName("IX_EmailVerificationTokens_UserId");
+
+        builder.Entity<EmailVerificationToken>()
+            .HasIndex(evt => evt.ExpiresAt)
+            .HasDatabaseName("IX_EmailVerificationTokens_ExpiresAt");
+
+        builder.Entity<EmailVerificationToken>()
+            .HasIndex(evt => evt.IsUsed)
+            .HasDatabaseName("IX_EmailVerificationTokens_IsUsed");
 
         // AuditLog indexes
         builder.Entity<AuditLog>()
