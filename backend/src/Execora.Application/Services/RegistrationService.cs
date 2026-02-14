@@ -243,8 +243,7 @@ public class RegistrationService : IRegistrationService
             LastName = user.LastName,
             OrganizationName = tenant.Name,
             Role = tenantUser.Role.ToString(),
-            EmailVerified = user.EmailVerified,
-            EmailVerificationToken = emailVerificationToken
+            EmailVerified = user.EmailVerified
         };
     }
 

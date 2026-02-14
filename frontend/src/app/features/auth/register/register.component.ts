@@ -136,11 +136,10 @@ export class RegisterComponent implements OnInit, OnDestroy {
       next: (response: RegisterResponse) => {
         this.snackBar.open('Registration successful! Please check your email for verification.', 'Close', { duration: 5000 });
 
-        // Redirect to verify-email page with email
+        // Redirect to verify-email page with email (token is sent via email only for security)
         this.router.navigate(['/verify-email'], {
           queryParams: {
-            email: registerData.email,
-            token: response.emailVerificationToken
+            email: registerData.email
           }
         });
       },

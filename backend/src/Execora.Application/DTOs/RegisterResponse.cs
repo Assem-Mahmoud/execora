@@ -44,9 +44,4 @@ public record RegisterResponse
     /// Email verification status
     /// </summary>
     public bool EmailVerified { get; init; }
-
-    /// <summary>
-    /// Email verification token (for client verification)
-    /// </summary>
-    public string? EmailVerificationToken { get; init; }
 }

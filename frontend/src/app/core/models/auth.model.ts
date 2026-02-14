@@ -35,7 +35,7 @@ export interface UserResponse {
   email: string;
   firstName: string;
   lastName: string;
-  emailConfirmed: boolean;
+  emailVerified: boolean;
   role: string;
   tenantId: string;
   tenantName?: string;
@@ -75,7 +75,6 @@ export interface RegisterResponse {
   organizationName: string;
   role: string;
   emailVerified: boolean;
-  emailVerificationToken?: string;
 }
 
 /**

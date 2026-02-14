@@ -12,7 +12,7 @@ public class UserResponse
     public string Email { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
-    public bool EmailConfirmed { get; set; }
+    public bool EmailVerified { get; set; }
     public string Role { get; set; } = string.Empty;
     public Guid? TenantId { get; set; }
     public string? TenantName { get; set; }

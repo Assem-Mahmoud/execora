@@ -304,7 +304,7 @@ export class AuthService {
     return {
       id: userResponse.id,
       email: userResponse.email,
-      emailVerified: userResponse.emailConfirmed,
+      emailVerified: userResponse.emailVerified,
       phoneNumberConfirmed: false,
       firstName: userResponse.firstName,
       lastName: userResponse.lastName,

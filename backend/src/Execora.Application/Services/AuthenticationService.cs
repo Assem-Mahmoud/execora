@@ -124,7 +124,7 @@ public class AuthenticationService : IAuthenticationService
                 Email = user.Email,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                EmailConfirmed = user.EmailVerified,
+                EmailVerified = user.EmailVerified,
                 Role = primaryTenantUser.Role.ToString(),
                 TenantId = primaryTenantUser.TenantId,
                 TenantName = primaryTenantUser.Tenant.Name

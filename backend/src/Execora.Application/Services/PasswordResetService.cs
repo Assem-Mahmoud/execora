@@ -129,16 +129,15 @@ public class PasswordResetService : IPasswordResetService
         // Validate new password requirements
         ValidatePassword(request.NewPassword);
 
+        // Hash new password
+        var newPasswordHash = _passwordHasher.HashPassword(request.NewPassword);
+
         // Check if password is in history (last 5 passwords)
         var passwordHistory = await GetPasswordHistoryAsync(user.Id, 5);
-        var newHash = _passwordHasher.HashPassword(request.NewPassword);
-        if (_passwordHasher.IsPasswordInHistory(newHash, passwordHistory))
+        if (_passwordHasher.IsPasswordInHistory(newPasswordHash, passwordHistory))
         {
             throw new InvalidOperationException("Cannot reuse a previous password");
         }
-
-        // Hash new password
-        var newPasswordHash = _passwordHasher.HashPassword(request.NewPassword);
 
         // Update user password
         await _userRepository.UpdatePasswordAsync(user.Id, newPasswordHash);
@@ -203,16 +202,15 @@ public class PasswordResetService : IPasswordResetService
         // Validate new password requirements
         ValidatePassword(request.NewPassword);
 
+        // Hash new password
+        var newPasswordHash = _passwordHasher.HashPassword(request.NewPassword);
+
         // Check if password is in history (last 5 passwords)
         var passwordHistory = await GetPasswordHistoryAsync(user.Id, 5);
-        var newHash = _passwordHasher.HashPassword(request.NewPassword);
-        if (_passwordHasher.IsPasswordInHistory(newHash, passwordHistory))
+        if (_passwordHasher.IsPasswordInHistory(newPasswordHash, passwordHistory))
         {
             throw new InvalidOperationException("Cannot reuse a recent password");
         }
-
-        // Hash new password
-        var newPasswordHash = _passwordHasher.HashPassword(request.NewPassword);
 
         // Update user password
         await _userRepository.UpdatePasswordAsync(user.Id, newPasswordHash);

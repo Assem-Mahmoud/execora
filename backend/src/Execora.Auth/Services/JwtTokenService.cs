@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Execora.Core.Entities;
 using Execora.Core.Enums;
+using Execora.Core.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -20,10 +21,14 @@ public class JwtTokenService : ITokenService
     private readonly string _audience;
     private readonly int _accessTokenExpirationMinutes;
     private readonly int _refreshTokenExpirationDays;
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
 
-    public JwtTokenService(IConfiguration configuration)
+    public JwtTokenService(
+        IConfiguration configuration,
+        IRefreshTokenRepository refreshTokenRepository)
     {
         _configuration = configuration;
+        _refreshTokenRepository = refreshTokenRepository;
         _secretKey = _configuration["Jwt:SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is not configured");
         _issuer = _configuration["Jwt:Issuer"] ?? "Execora";
         _audience = _configuration["Jwt:Audience"] ?? "ExecoraApp";
@@ -85,14 +90,9 @@ public class JwtTokenService : ITokenService
         return DateTime.UtcNow.AddDays(_refreshTokenExpirationDays);
     }
 
-    public Task InvalidateUserRefreshTokensAsync(Guid userId)
+    public async Task InvalidateUserRefreshTokensAsync(Guid userId)
     {
-        // In a real implementation, this would:
-        // 1. Look up all refresh tokens for the user in the database
-        // 2. Mark them as invalidated
-        // 3. Clear any cached tokens
-
-        // For now, just return a completed task as a placeholder
-        return Task.CompletedTask;
+        // Revoke all active refresh tokens for the user
+        await _refreshTokenRepository.RevokeAllForUserAsync(userId);
     }
 }

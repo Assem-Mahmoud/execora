@@ -132,7 +132,8 @@ public class EmailVerificationService : IEmailVerificationService
                 };
             }
 
-            // Mark token as used
+            // Mark token as used FIRST to prevent race condition
+            // This ensures concurrent requests will fail the IsUsed check above
             verificationToken.IsUsed = true;
             verificationToken.UsedAt = DateTime.UtcNow;
             await _tokenRepository.UpdateAsync(verificationToken);

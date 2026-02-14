@@ -100,7 +100,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       },
       error: (error: any) => {
         this.loading = false;
-        this.snackBar.open(error?.error?.detail || 'Login failed. Please check your credentials and try again.', 'Close', { duration: 5000 });
+        this.snackBar.open(error?.error?.message || error?.message || 'Login failed. Please check your credentials and try again.', 'Close', { duration: 5000 });
         console.error('Login error:', error);
       }
     });
