@@ -93,7 +93,7 @@ public class RegisterController : ControllerBase
         {
             _logger.LogInformation("Email verification attempt with token");
 
-            var response = await _emailVerificationService.VerifyEmailAsync(request.Token, cancellationToken);
+            var response = await _emailVerificationService.VerifyEmailAsync(request.Token);
 
             if (response.Success)
             {
@@ -131,7 +131,7 @@ public class RegisterController : ControllerBase
         {
             _logger.LogInformation("Verification email resend attempt for: {Email}", request.Email);
 
-            var response = await _emailVerificationService.ResendVerificationEmailAsync(request.Email, cancellationToken);
+            var response = await _emailVerificationService.ResendVerificationEmailAsync(request.Email);
 
             if (response.Success)
             {

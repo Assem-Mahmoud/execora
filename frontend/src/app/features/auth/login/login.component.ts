@@ -4,6 +4,11 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../../core/services/auth.service';
 import { LoginRequest } from '../../../core/models/auth.model';
 import { User } from '../../../core/models/user.model';
@@ -11,7 +16,13 @@ import { User } from '../../../core/models/user.model';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule
+  ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
@@ -26,18 +37,20 @@ export class LoginComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private message: NzMessageService,
+    private snackBar: MatSnackBar,
     private authService: AuthService
   ) {
     this.loginForm = this.fb.group({
       email: ['', [
         Validators.required,
         Validators.email,
-        Validators.maxLength(255)
+        Validators.maxLength(255),
+        Validators.pattern('^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$')
       ]],
       password: ['', [
         Validators.required,
-        Validators.minLength(8)
+        Validators.minLength(12),
+        Validators.pattern('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#^~\\-_=.])[A-Za-z\\d@$!%*?&#^~\\-_=.]{12,}$')
       ]]
     });
   }
@@ -81,13 +94,13 @@ export class LoginComponent implements OnInit, OnDestroy {
       })
     ).subscribe({
       next: () => {
-        this.message.success('Login successful!');
+        this.snackBar.open('Login successful!', 'Close', { duration: 3000 });
         // Redirect to dashboard
         this.router.navigate(['/dashboard']);
       },
       error: (error: any) => {
         this.loading = false;
-        this.message.error(error?.error?.detail || 'Login failed. Please check your credentials and try again.');
+        this.snackBar.open(error?.error?.detail || 'Login failed. Please check your credentials and try again.', 'Close', { duration: 5000 });
         console.error('Login error:', error);
       }
     });

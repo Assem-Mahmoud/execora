@@ -4,23 +4,24 @@ using Execora.Core.Entities;
 using Execora.Core.Enums;
 using Execora.Core.Interfaces;
 using Execora.Infrastructure.Repositories;
+using Moq;
+using Execora.Infrastructure.Services.Email;
+using Execora.Auth.Services;
 
 namespace Execora.Tests.Unit.Services;
 
-[TestFixture]
 public class PasswordResetServiceTests
 {
-    private Mock<IUserRepository> _mockUserRepository;
-    private Mock<ITenantRepository> _mockTenantRepository;
-    private Mock<IPasswordResetTokenRepository> _mockPasswordResetTokenRepository;
-    private Mock<IEmailService> _mockEmailService;
-    private Mock<ITokenService> _mockTokenService;
-    private Mock<IAuditLogService> _mockAuditLogService;
-    private PasswordResetService _passwordResetService;
-    private Mock<IPasswordHasher> _mockPasswordHasher;
+    private Mock<IUserRepository> _mockUserRepository = null!;
+    private Mock<ITenantRepository> _mockTenantRepository = null!;
+    private Mock<IPasswordResetTokenRepository> _mockPasswordResetTokenRepository = null!;
+    private Mock<IEmailService> _mockEmailService = null!;
+    private Mock<ITokenService> _mockTokenService = null!;
+    private Mock<IAuditLogService> _mockAuditLogService = null!;
+    private PasswordResetService _passwordResetService = null!;
+    private Mock<IPasswordHasher> _mockPasswordHasher = null!;
 
-    [SetUp]
-    public void Setup()
+    public PasswordResetServiceTests()
     {
         _mockUserRepository = new Mock<IUserRepository>();
         _mockTenantRepository = new Mock<ITenantRepository>();
@@ -41,7 +42,7 @@ public class PasswordResetServiceTests
         );
     }
 
-    [Test]
+    [Fact]
     public async Task ForgotPassword_WithValidEmail_ShouldGenerateResetToken()
     {
         // Arrange
@@ -71,7 +72,7 @@ public class PasswordResetServiceTests
             It.Is<PasswordResetToken>(t => t.UserId == user.Id)), Times.Once);
     }
 
-    [Test]
+    [Fact]
     public async Task ForgotPassword_WithNonExistentEmail_ShouldNotFail()
     {
         // Arrange
@@ -88,7 +89,7 @@ public class PasswordResetServiceTests
         _mockEmailService.Verify(x => x.SendPasswordResetEmailAsync(It.IsAny<PasswordResetToken>()), Times.Never);
     }
 
-    [Test]
+    [Fact]
     public async Task ResetPassword_WithValidToken_ShouldUpdatePassword()
     {
         // Arrange
@@ -131,7 +132,7 @@ public class PasswordResetServiceTests
         _mockPasswordHasher.Verify(x => x.VerifyPassword(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
-    [Test]
+    [Fact]
     public async Task ResetPassword_WithInvalidToken_ShouldThrowException()
     {
         // Arrange
@@ -150,7 +151,7 @@ public class PasswordResetServiceTests
             _passwordResetService.ResetPasswordAsync(request));
     }
 
-    [Test]
+    [Fact]
     public async Task ResetPassword_WithExpiredToken_ShouldThrowException()
     {
         // Arrange
@@ -178,7 +179,7 @@ public class PasswordResetServiceTests
             _passwordResetService.ResetPasswordAsync(request));
     }
 
-    [Test]
+    [Fact]
     public async Task ResetPassword_WithUsedToken_ShouldThrowException()
     {
         // Arrange
@@ -206,7 +207,7 @@ public class PasswordResetServiceTests
             _passwordResetService.ResetPasswordAsync(request));
     }
 
-    [Test]
+    [Fact]
     public async Task ChangePassword_WithValidCurrentPassword_ShouldUpdatePassword()
     {
         // Arrange
@@ -241,7 +242,7 @@ public class PasswordResetServiceTests
         _mockPasswordHasher.Verify(x => x.AddToPasswordHistory(userId, "newhash"), Times.Once);
     }
 
-    [Test]
+    [Fact]
     public async Task ChangePassword_WithInvalidCurrentPassword_ShouldThrowException()
     {
         // Arrange
@@ -269,7 +270,7 @@ public class PasswordResetServiceTests
             _passwordResetService.ChangePasswordAsync(userId, request));
     }
 
-    [Test]
+    [Fact]
     public async Task ChangePassword_WithReusedPassword_ShouldThrowException()
     {
         // Arrange

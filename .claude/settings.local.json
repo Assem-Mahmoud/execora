@@ -35,7 +35,13 @@
       "Bash(ng test --no-watch)",
       "Bash(ng test:*)",
       "Bash(ng build:*)",
-      "Bash(npm run lint:*)"
+      "Bash(npm run lint:*)",
+      "Bash(npm start)",
+      "Bash(curl:*)",
+      "Bash(.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks)",
+      "Bash(powershell:*)",
+      "Bash(ls:*)",
+      "Bash(dir:*)"
     ]
   }
 }

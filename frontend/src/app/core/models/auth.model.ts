@@ -23,12 +23,22 @@ export interface LoginRequest {
  * Login response
  */
 export interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-  user: User;
-  tenant: Tenant;
-  availableTenants?: AvailableTenant[];
+  token: string;
+  user: UserResponse;
+}
+
+/**
+ * User response for login
+ */
+export interface UserResponse {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  emailConfirmed: boolean;
+  role: string;
+  tenantId: string;
+  tenantName?: string;
 }
 
 /**

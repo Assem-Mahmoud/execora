@@ -5,55 +5,30 @@
       <p>Sign in to your account to continue</p>
     </div>
 
-    <form nz-form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <nz-form-item>
-        <nz-form-control nzErrorTip="Please enter a valid email address">
-          <label nz-form-label>Email</label>
-          <nz-form-control>
-            <input
-              nz-input
-              type="email"
-              formControlName="email"
-              placeholder="Enter your email"
-              (keypress)="onKeyPress($event)"
-            />
-          </nz-form-control>
-        </nz-form-control>
-      </nz-form-item>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="fill">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" placeholder="Enter your email">
+        <mat-error *ngIf="f['email']?.errors?.['required']">Please enter a valid email address</mat-error>
+        <mat-error *ngIf="f['email']?.errors?.['email']">Please enter a valid email address</mat-error>
+      </mat-form-field>
 
-      <nz-form-item>
-        <nz-form-control nzErrorTip="Password must be at least 8 characters long">
-          <label nz-form-label>Password</label>
-          <nz-form-control>
-            <input
-              nz-input
-              type="password"
-              formControlName="password"
-              placeholder="Enter your password"
-              (keypress)="onKeyPress($event)"
-            />
-          </nz-form-control>
-        </nz-form-control>
-      </nz-form-item>
+      <mat-form-field appearance="fill">
+        <mat-label>Password</mat-label>
+        <input matInput type="password" formControlName="password" placeholder="Enter your password">
+        <mat-error *ngIf="f['password']?.errors?.['required']">Password is required</mat-error>
+        <mat-error *ngIf="f['password']?.errors?.['minlength']">Password must be at least 12 characters long</mat-error>
+      </mat-form-field>
 
-      <nz-form-item>
-        <div class="form-footer">
-          <label nz-checkbox formControlName="rememberMe">Remember me</label>
-          <a href="javascript:;" (click)="forgotPassword()">Forgot Password?</a>
-        </div>
-      </nz-form-item>
+      <div class="form-footer">
+        <mat-checkbox formControlName="rememberMe">Remember me</mat-checkbox>
+        <a href="javascript:;" (click)="forgotPassword()">Forgot Password?</a>
+      </div>
 
-      <nz-form-item>
-        <button
-          nz-button
-          type="submit"
-          [nzLoading]="loading"
-          [nzType]="'primary'"
-          [nzBlock]="true"
-        >
-          Sign In
-        </button>
-      </nz-form-item>
+      <button mat-raised-button color="primary" type="submit" [disabled]="loading">
+        <span *ngIf="loading">Signing in...</span>
+        <span *ngIf="!loading">Sign In</span>
+      </button>
     </form>
 
     <div class="login-divider">
@@ -61,9 +36,8 @@
     </div>
 
     <button
-      nz-button
-      [nzType]="'default'"
-      [nzBlock]="true"
+      mat-raised-button
+      color="primary"
       (click)="goToRegister()"
     >
       Create Account

@@ -3,37 +3,7 @@ import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { map, switchMap, tap, catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { User, UserProfile, Tenant, TenantRole } from '../models';
-import { RegisterRequest, RegisterResponse, VerifyEmailRequest, ResendVerificationRequest, VerifyEmailResponse } from '../models/auth.model';
-
-/**
- * Authentication tokens
- */
-export interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-}
-
-/**
- * Login request
- */
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-
-/**
- * Token response from API
- */
-interface TokenResponse {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-  user: UserProfile;
-  tenant: Tenant;
-  role: TenantRole;
-}
+import { LoginRequest, LoginResponse, UserResponse, RegisterRequest, RegisterResponse, VerifyEmailRequest, ResendVerificationRequest, VerifyEmailResponse, AuthTokens } from '../models/auth.model';
 
 /**
  * Current authenticated user state
@@ -123,15 +93,15 @@ export class AuthService {
    * Login with email and password
    */
   login(credentials: LoginRequest): Observable<UserProfile> {
-    return this.apiService.post<TokenResponse>('/auth/login', credentials).pipe(
+    return this.apiService.post<LoginResponse>('/auth/login', credentials).pipe(
       tap(response => this.storeTokens(response)),
-      map(response => response.user),
+      map(response => this.mapUserResponse(response.user)),
       tap(user => this.updateAuthState({
         isAuthenticated: true,
         user,
         currentTenant: this.getStoredTenant(),
         currentRole: this.getStoredRole(),
-        allTenants: user.tenantUsers.map(tu => tu.tenant!).filter(t => t)
+        allTenants: [] // Will be updated when user profile is loaded
       }))
     );
   }
@@ -266,12 +236,23 @@ export class AuthService {
   /**
    * Store authentication tokens and user data
    */
-  private storeTokens(response: TokenResponse): void {
-    localStorage.setItem(this.ACCESS_TOKEN_KEY, response.accessToken);
-    localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
+  private storeTokens(response: LoginResponse): void {
+    localStorage.setItem(this.ACCESS_TOKEN_KEY, response.token);
+    // Backend only returns access token for now
+    // TODO: Implement refresh token functionality later
+    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     localStorage.setItem(this.USER_KEY, JSON.stringify(response.user));
-    localStorage.setItem(this.TENANT_KEY, JSON.stringify(response.tenant));
-    localStorage.setItem(this.ROLE_KEY, response.role);
+    // Store tenant info from user response
+    if (response.user.tenantName && response.user.tenantId) {
+      const tenant = {
+        id: response.user.tenantId,
+        name: response.user.tenantName,
+        slug: response.user.tenantName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+        subscriptionPlan: 'Trial' as any
+      };
+      localStorage.setItem(this.TENANT_KEY, JSON.stringify(tenant));
+      localStorage.setItem(this.ROLE_KEY, response.user.role);
+    }
   }
 
   /**
@@ -314,5 +295,39 @@ export class AuthService {
       currentRole: null,
       allTenants: []
     });
+  }
+
+  /**
+   * Map user response to UserProfile
+   */
+  private mapUserResponse(userResponse: UserResponse): UserProfile {
+    return {
+      id: userResponse.id,
+      email: userResponse.email,
+      emailVerified: userResponse.emailConfirmed,
+      phoneNumberConfirmed: false,
+      firstName: userResponse.firstName,
+      lastName: userResponse.lastName,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      tenantUsers: [{
+        id: '',
+        tenantId: userResponse.tenantId || '',
+        userId: userResponse.id,
+        role: userResponse.role as TenantRole,
+        permissions: null,
+        invitedBy: null,
+        invitedAt: new Date().toISOString(),
+        joinedAt: new Date().toISOString(),
+        isActive: true,
+        tenant: {
+          id: userResponse.tenantId || '',
+          name: userResponse.tenantName || '',
+          slug: userResponse.tenantName?.toLowerCase().replace(/[^a-z0-9]/g, '') || '',
+          subscriptionPlan: 'Trial' as any
+        } as Tenant
+      }]
+    } as UserProfile;
   }
 }

@@ -100,7 +100,7 @@ export class PasswordStrengthComponent {
     return Math.min(score, 5);
   }
 
-  private getStrengthPercentage(): number {
+  getStrengthPercentage(): number {
     const score = this.calculatePasswordScore(this.password);
     return (score / 5) * 100;
   }

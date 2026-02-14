@@ -1,0 +1,71 @@
+# =============================================================================
+# EXECORA .dockerignore
+# =============================================================================
+
+# Ignore development files and build artifacts
+**/.git
+**/.gitignore
+**/README.md
+**/LICENSE
+**/CHANGELOG.md
+
+# .NET specific files
+**/*.csproj
+**/*.sln
+**/packages/
+**/bin/
+**/obj/
+**/*.log
+**/*.user
+**/*.suo
+**/.vs/
+
+# Node.js specific files
+**/node_modules/
+**/package.json
+**/package-lock.json
+**/yarn.lock
+**/pnpm-lock.yaml
+**/.angular/
+**/dist/
+**/build/
+**/coverage/
+**/test-results/
+
+# Environment files
+**/.env
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+
+# IDE files
+**/.vscode/
+**/.idea/
+**/*.sublime-project
+**/*.sublime-workspace
+
+# OS files
+**/Thumbs.db
+**/.DS_Store
+**/ehthumbs.db
+
+# Test files and temporary files
+**/*.test.*
+**/*.spec.*
+**/*.tmp
+**/*.temp
+**/test-results/
+**/playwright-report/
+
+# Coverage reports
+**/coverage/
+**/lcov-report/
+
+# Configuration files that should be passed separately
+**/appsettings.*
+**/*.config.*
+**/*.json
+
+# Exclude this .dockerignore file itself
+!.dockerignore

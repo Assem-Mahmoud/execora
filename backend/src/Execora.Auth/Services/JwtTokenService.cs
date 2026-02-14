@@ -84,4 +84,15 @@ public class JwtTokenService : ITokenService
     {
         return DateTime.UtcNow.AddDays(_refreshTokenExpirationDays);
     }
+
+    public Task InvalidateUserRefreshTokensAsync(Guid userId)
+    {
+        // In a real implementation, this would:
+        // 1. Look up all refresh tokens for the user in the database
+        // 2. Mark them as invalidated
+        // 3. Clear any cached tokens
+
+        // For now, just return a completed task as a placeholder
+        return Task.CompletedTask;
+    }
 }

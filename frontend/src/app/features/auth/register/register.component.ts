@@ -3,7 +3,11 @@ import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/fo
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { NzMessageService } from 'ng-zorro-antd/message';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PasswordStrengthComponent } from '../../../shared/components/password-strength/password-strength.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { RegisterRequest, RegisterResponse } from '../../../core/models/auth.model';
@@ -11,7 +15,14 @@ import { RegisterRequest, RegisterResponse } from '../../../core/models/auth.mod
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, PasswordStrengthComponent],
+  imports: [
+    CommonModule,
+    PasswordStrengthComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatProgressSpinnerModule
+  ],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss']
 })
@@ -34,7 +45,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private message: NzMessageService,
+    private snackBar: MatSnackBar,
     private authService: AuthService
   ) {
     this.registerForm = this.fb.group({
@@ -84,7 +95,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
   }
 
   // Handle password input changes
-  onPasswordChange(password: string): void {
+  onPasswordChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const password = input.value;
     this.passwordRequirements = {
       length: password.length >= 12,
       uppercase: /[A-Z]/.test(password),
@@ -110,7 +123,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     // Check password requirements
     const allRequirementsMet = Object.values(this.passwordRequirements).every(req => req);
     if (!allRequirementsMet) {
-      this.message.error('Password does not meet all requirements');
+      this.snackBar.open('Password does not meet all requirements', 'Close', { duration: 5000 });
       return;
     }
 
@@ -121,7 +134,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
     const subscription = this.authService.register(registerData).subscribe({
       next: (response: RegisterResponse) => {
-        this.message.success('Registration successful! Please check your email for verification.');
+        this.snackBar.open('Registration successful! Please check your email for verification.', 'Close', { duration: 5000 });
 
         // Redirect to verify-email page with email
         this.router.navigate(['/verify-email'], {
@@ -133,7 +146,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
       },
       error: (error: any) => {
         this.loading = false;
-        this.message.error(error?.error?.detail || 'Registration failed. Please try again.');
+        this.snackBar.open(error?.error?.detail || 'Registration failed. Please try again.', 'Close', { duration: 5000 });
         console.error('Registration error:', error);
       }
     });
@@ -180,7 +193,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   // Auto-generate organization slug from name (for preview)
   get organizationSlug(): string {
-    if (!this.f['organizationName'].value) return '';
+    if (!this.f['organizationName']?.value) return '';
     return this.f['organizationName'].value
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '-')

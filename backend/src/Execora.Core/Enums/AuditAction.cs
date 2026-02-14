@@ -46,9 +46,14 @@ public enum AuditAction
     PasswordChanged = 8,
 
     /// <summary>
+    /// Password change failed
+    /// </summary>
+    PasswordChangeFailed = 9,
+
+    /// <summary>
     /// User's password was reset
     /// </summary>
-    PasswordReset = 9,
+    PasswordReset = 10,
 
     /// <summary>
     /// User's email was verified
@@ -73,5 +78,25 @@ public enum AuditAction
     /// <summary>
     /// User switched active tenant
     /// </summary>
-    TenantSwitched = 14
+    TenantSwitched = 14,
+
+    /// <summary>
+    /// Password reset was requested
+    /// </summary>
+    PasswordResetRequested = 16,
+
+    /// <summary>
+    /// Password reset failed
+    /// </summary>
+    PasswordResetFailed = 17,
+
+    /// <summary>
+    /// General security event
+    /// </summary>
+    SecurityEvent = 18,
+
+    /// <summary>
+    /// Error occurred
+    /// </summary>
+    Error = 19
 }

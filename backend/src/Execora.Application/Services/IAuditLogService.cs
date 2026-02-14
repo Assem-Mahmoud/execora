@@ -88,4 +88,26 @@ public interface IAuditLogService
         string? userAgent = null,
         Guid? projectId = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Logs a security event
+    /// </summary>
+    Task LogSecurityEventAsync(
+        AuditAction action,
+        string entityName,
+        string? entityId,
+        string description,
+        string? ipAddress = null,
+        string? userAgent = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Logs an error
+    /// </summary>
+    Task LogErrorAsync(
+        string errorMessage,
+        string? stackTrace = null,
+        string? ipAddress = null,
+        string? userAgent = null,
+        CancellationToken cancellationToken = default);
 }

@@ -32,4 +32,9 @@ public interface ITokenService
     /// Gets the expiration date for refresh tokens
     /// </summary>
     DateTime GetRefreshTokenExpiration();
+
+    /// <summary>
+    /// Invalidates all refresh tokens for a specific user
+    /// </summary>
+    Task InvalidateUserRefreshTokensAsync(Guid userId);
 }
